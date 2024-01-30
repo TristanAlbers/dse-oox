@@ -46,9 +46,13 @@ impl ExecutionTreeBasedHeuristic for RoundRobin {
         st: &SymbolTable,
         entry_method: &crate::cfg::MethodIdentifier,
         coverage: &mut HashMap<ProgramCounter, usize>,
+        root_logger: Logger,
+        path_counter: Rc<RefCell<IdCounter<u64>>>,
+        statistics: &mut Statistics,
+        options: &Options,
     ) -> Rc<RefCell<ExecutionTree>> {
         let heuristic = self.heuristics[self.next_up_heuristic].as_mut();
-        let states_node = heuristic.choice(root, program, flows, st, entry_method, coverage);
+        let states_node = heuristic.choice(root, program, flows, st, entry_method, coverage, root_logger, path_counter, statistics, options);
 
         self.next_up_heuristic = (self.next_up_heuristic + 1) % self.heuristics.len();
 
@@ -67,7 +71,7 @@ pub(crate) fn sym_exec(
     entry_method: crate::cfg::MethodIdentifier,
     options: &Options,
 ) -> SymResult {
-    let heuristic = RoundRobin::md2u_with_random_path();
+    let mut heuristic = RoundRobin::md2u_with_random_path();
     sym_exec_execution_tree(
         state,
         program,
@@ -77,7 +81,7 @@ pub(crate) fn sym_exec(
         path_counter,
         statistics,
         entry_method,
-        heuristic,
+        &mut heuristic,
         options,
     )
 }

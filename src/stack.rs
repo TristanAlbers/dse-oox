@@ -68,3 +68,14 @@ impl std::fmt::Debug for StackFrame {
             .finish()
     }
 }
+
+impl std::fmt::Debug for Stack{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Stack")
+            .field("Stackframe", &self.current_stackframe())
+            // .field("returning_lhs", &self.returning_lhs.as_ref().map(|lhs| ToString::to_string(&lhs)))
+            // .field("params", &self.params)
+            // .field("current_member", &self.current_member)       // omitted because the whole body will be logged.
+            .finish()
+    }
+}

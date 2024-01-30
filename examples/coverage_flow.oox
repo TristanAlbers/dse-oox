@@ -1,0 +1,56 @@
+class Foo {
+
+    int y;
+
+    Foo() { this.y := 1; }
+
+    // Returns valid under depth-first-search? -> exceptional needs to be set
+    static void test1(int x) exceptional (false) {
+        Foo myFoo := new Foo();
+
+        if (x > 7){
+            myFoo.y := 2;
+        } else {
+            myFoo.y := 2;
+        }
+
+        if (x > 3){
+            myFoo.y := 8;
+        } else {
+            myFoo.y := 5;
+        }
+
+        int q := myFoo.y;
+        myFoo.y := q + 1;
+        
+        int res := myFoo.y;
+        assert(res > 1);
+    }
+
+    // Is invalid 
+    static void test2(int x, bool z, int y)  {
+        Foo myFoo := new Foo();
+
+        if (x > 3){
+            myFoo.y := -10;
+        } else {
+            myFoo.y := 2;
+        }
+
+        if (z){
+            myFoo.y := -10;
+        }
+
+        if (y < 3){
+            myFoo.y := -10;
+        }
+
+        int q := myFoo.y;   // -10      --  2
+        myFoo.y := q + 1;   // -9       --  3
+        
+        int res := myFoo.y; // -9       --  3
+        assert(res > 1);    // -9 > 1   --  3 > 1
+    }
+}
+
+// cargo run -- verify "./examples/coverage_flow.oox" --heuristic depth-first-search --function Foo.test1 --k 200

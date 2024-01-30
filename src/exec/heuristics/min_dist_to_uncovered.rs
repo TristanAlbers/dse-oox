@@ -84,6 +84,10 @@ impl ExecutionTreeBasedHeuristic for MinDist2Uncovered {
         st: &SymbolTable,
         entry_method: &MethodIdentifier,
         coverage: &mut HashMap<ProgramCounter, usize>,
+        _root_logger: Logger,
+        _path_counter: Rc<RefCell<IdCounter<u64>>>,
+        _statistics: &mut Statistics,
+        _options: &Options,
     ) -> Rc<RefCell<ExecutionTree>> {
         let leafs = ExecutionTree::leafs(root);
 
@@ -151,7 +155,7 @@ pub(crate) fn sym_exec(
         path_counter,
         statistics,
         entry_method,
-        MinDist2Uncovered::new(),
+        &mut MinDist2Uncovered::new(),
         options,
     )
 }

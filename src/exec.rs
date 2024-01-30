@@ -109,7 +109,7 @@ impl Debug for State {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("State")
             .field("pc", &self.pc)
-            // .field("stack", &self.stack)
+            .field("stack", &self.stack)
             // .field("heap", &self.heap)
             // .field("precondition", &self.precondition)
             // .field("constraints", &self.constraints)
@@ -261,8 +261,8 @@ fn action(
     debug!(state.logger, "Action {}", action;
      "stack" => ?state.stack.current_stackframe(),
      "heap" => ?state.heap,
-     "alias_map" => ?state.alias_map
-    //  "constraints" => ?state.constraints,
+     "alias_map" => ?state.alias_map,
+     "constraints" => ?state.constraints,
     );
 
     match action {
@@ -507,8 +507,20 @@ fn eval_assertion(state: &mut State, expression: Rc<Expression>, en: &mut impl E
     // println!("expression: {:?}", &expression);
 
     if *expression == Expression::TRUE {
+        debug!(
+            state.logger,
+            "No Z3, returned {}",
+            false
+        );
+        en.statistics().measure_local_solve();
         false
     } else if *expression == Expression::FALSE {
+        debug!(
+            state.logger,
+            "No Z3, returned {}",
+            true
+        );
+        en.statistics().measure_local_solve();
         true
     } else {
         let symbolic_refs = find_symbolic_refs(&expression);
@@ -547,7 +559,7 @@ fn eval_assertion(state: &mut State, expression: Rc<Expression>, en: &mut impl E
             if solve_with_z3_only {
                 // Solve through only Z3
                 let result = z3_checker::all_z3::verify(&expression, &state.alias_map);
-                if let SatResult::Unsat = result {
+                if let SatResult::Unsat = result.0 {
                     // valid, continue
                 } else {
                     return false;
@@ -574,9 +586,19 @@ fn eval_assertion(state: &mut State, expression: Rc<Expression>, en: &mut impl E
                     if *expression == Expression::TRUE {
                         // Invalid
                         en.statistics().measure_local_solve();
+                        debug!(
+                            state.logger,
+                            "No Z3, returned {}",
+                            true
+                        );
                         return false;
                     } else if *expression == Expression::FALSE {
                         // valid, continue
+                        debug!(
+                            state.logger,
+                            "No Z3, returned {}",
+                            false
+                        );
                         en.statistics().measure_local_solve();
                     } else {
                         en.statistics().measure_invoke_z3();
@@ -1371,7 +1393,7 @@ fn exec_assume(
                 } else {
                     let result = z3_checker::all_z3::verify(&expression, &state.alias_map);
                     // eval_assertion(state, expression, en)
-                    if result == SatResult::Sat {
+                    if result.0 == SatResult::Sat {
                         if *expression != Expression::TRUE {
                             state.constraints.insert(assumption);
                         }
@@ -1514,6 +1536,7 @@ pub enum Heuristic {
     RandomPath,
     MinDist2Uncovered,
     RoundRobinMD2URandomPath,
+    ConcolicExecution
 }
 
 /// For a description of each option, see Commands in main.rs
@@ -1718,13 +1741,20 @@ pub fn verify(
     let path_counter = Rc::new(RefCell::new(IdCounter::new(0)));
     let mut statistics = Statistics::default();
 
+    // dbg!(&state);
+    // let cfgprint = crate::prettyprint::cfg_pretty::pretty_print_cfg_method_from_entry(
+    //     pc, &|_ : u64 | { Some("dec".to_owned()) }, &program, &flows);
+    // dbg!(&cfgprint);
+    
     // Choose between heuristic function (with matching parameters)
     let sym_exec = match options.heuristic {
         Heuristic::DepthFirstSearch => heuristics::depth_first_search::sym_exec,
         Heuristic::RandomPath => heuristics::random_path::sym_exec,
         Heuristic::MinDist2Uncovered => heuristics::min_dist_to_uncovered::sym_exec,
         Heuristic::RoundRobinMD2URandomPath => heuristics::round_robin::sym_exec,
+        Heuristic::ConcolicExecution => heuristics::concolic_execution::sym_exec
     };
+
     let sym_result = sym_exec(
         state,
         &program,

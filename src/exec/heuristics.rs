@@ -20,6 +20,8 @@ pub mod depth_first_search;
 pub mod min_dist_to_uncovered;
 pub mod random_path;
 pub mod round_robin;
+pub mod concolic_execution;
+pub mod fuzzer;
 
 type Cost = u64;
 pub type ProgramCounter = u64;

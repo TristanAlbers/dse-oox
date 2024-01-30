@@ -42,7 +42,7 @@ class Node {
     }
 
     static void test1(Node node)
-        requires(node != null)
+        // requires(node != null)
         exceptional(false)
     {
         Node min := node.min() ;

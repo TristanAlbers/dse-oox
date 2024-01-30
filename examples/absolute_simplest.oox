@@ -1,7 +1,21 @@
 class Foo {
 
-    static void f() {
+    int y;
+
+    Foo() { this.y := 1; }
+
+    static void test1() {
+        Foo myFoo := new Foo();
         int x := 3;
-        assert(x == 3);
+        int y := myFoo.y;
+
+        if (x > 3){
+            myFoo.y := 2;
+        } else {
+            myFoo.y := 3;
+        }
+
+        x := x + y;
+        assert(x > 3);
     }
 }

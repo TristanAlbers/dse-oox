@@ -67,7 +67,7 @@ impl TreeNode {
 /// We use this Identifier for this.
 type BranchId = u64;
 
-fn random_path(
+pub(super) fn random_path(
     mut tree: Rc<RefCell<ExecutionTree>>,
     rng: &mut impl Rng,
 ) -> Rc<RefCell<ExecutionTree>> {
@@ -108,6 +108,10 @@ impl ExecutionTreeBasedHeuristic for RandomPath {
         _st: &SymbolTable,
         _entry_method: &MethodIdentifier,
         _coverage: &mut HashMap<ProgramCounter, usize>,
+        _root_logger: Logger,
+        _path_counter: Rc<RefCell<IdCounter<u64>>>,
+        _statistics: &mut Statistics,
+        _options: &Options,
     ) -> Rc<RefCell<ExecutionTree>> {
         random_path(root, &mut self.rng)
     }
@@ -134,7 +138,7 @@ pub(crate) fn sym_exec(
         path_counter,
         statistics,
         entry_method,
-        RandomPath::new(),
+        &mut RandomPath::new(),
         options,
     )
 }

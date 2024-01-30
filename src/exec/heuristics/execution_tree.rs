@@ -1,8 +1,5 @@
 use std::{
-    cell::RefCell,
-    collections::HashMap,
-    ops::Deref,
-    rc::{Rc, Weak},
+    cell::RefCell, collections::HashMap, ops::Deref, rc::{Rc, Weak}
 };
 
 use itertools::Itertools;
@@ -27,6 +24,10 @@ pub(super) trait ExecutionTreeBasedHeuristic {
         st: &SymbolTable,
         entry_method: &MethodIdentifier,
         coverage: &mut HashMap<ProgramCounter, usize>,
+        root_logger: Logger,
+        path_counter: Rc<RefCell<IdCounter<u64>>>,
+        statistics: &mut Statistics,
+        options: &Options,
     ) -> Rc<RefCell<ExecutionTree>>;
 
     /// Writes the program to a file 'visualize', with some information for each statement provided by the decorator.
@@ -139,7 +140,7 @@ pub(super) fn sym_exec_execution_tree(
     path_counter: Rc<RefCell<IdCounter<u64>>>,
     statistics: &mut Statistics,
     entry_method: MethodIdentifier,
-    mut heuristic: impl ExecutionTreeBasedHeuristic,
+    heuristic: &mut impl ExecutionTreeBasedHeuristic,
     options: &Options,
 ) -> SymResult {
     let tree = Rc::new(RefCell::new(ExecutionTree::Leaf {
@@ -157,6 +158,10 @@ pub(super) fn sym_exec_execution_tree(
             st,
             &entry_method,
             &mut coverage,
+            root_logger.clone(),
+            path_counter.clone(),
+            statistics,
+            options,
         );
         let current_pc = states_node.borrow().statement();
         *coverage.entry(current_pc).or_insert(0) += 1;

@@ -37,13 +37,13 @@ pub mod concretization {
 /// This starts off by initialising for each symbolic object (used in the expression), a Z3 set of their concrete values.
 /// Then we add a Z3 constraint that the symbolic object is one of the values in the set.
 pub mod all_z3 {
-    use z3::Sort;
+    use z3::{Model, Sort};
 
     use crate::exec::alias_map::AliasMap;
 
     use super::*;
 
-    pub fn verify(expression: &Expression, alias_map: &AliasMap) -> SatResult {
+    pub fn verify<'a>(expression: &Expression, alias_map: &AliasMap) -> (SatResult, String) {
         let cfg = Config::new();
         let ctx = Context::new(&cfg);
 
@@ -80,7 +80,17 @@ pub mod all_z3 {
         solver.assert(&Bool::try_from(z3_assertion).unwrap());
 
         // println!("{}", solver.to_string());
-        solver.check()
+        let res = solver.check();
+
+        let str;
+
+        if let Some(model) = solver.get_model() {
+            str = model.to_string();
+        } else {
+            str = "None Model".to_string();
+        }
+
+        (res, str)
     }
 }
 

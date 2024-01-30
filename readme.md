@@ -7,6 +7,10 @@ A symbolic verification tool for verifying object oriented languages. Programs t
 - Other optimisations
 
 ## Running for the first time
+[Windows]  
+Make sure to have cmake installed  
+Make sure to have `libclang.dll` installed. Can be done via `choco install llvm` on powershell
+
 Make sure you have Rust installed <https://www.rust-lang.org/tools/install>.
 We can run and build the project in debug mode with `cargo run`, `cargo build` and in release mode by passing the `--release` flag.
 Building the project for the first time can take 5-10 minutes because it has to build a version of Z3.
