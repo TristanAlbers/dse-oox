@@ -37,7 +37,7 @@ pub mod concretization {
 /// This starts off by initialising for each symbolic object (used in the expression), a Z3 set of their concrete values.
 /// Then we add a Z3 constraint that the symbolic object is one of the values in the set.
 pub mod all_z3 {
-    use z3::{Model, Sort};
+    use z3::Sort;
 
     use crate::exec::alias_map::AliasMap;
 

@@ -73,6 +73,16 @@ pub(super) enum ExecutionTree {
     },
 }
 
+impl Default for ExecutionTree{
+    fn default() -> Self {
+        Self::Leaf { 
+            parent: Weak::new(), 
+            statement: 0, 
+            states: Vec::new() 
+        }
+    }
+}
+
 impl ExecutionTree {
     pub(super) fn parent(&self) -> Weak<RefCell<ExecutionTree>> {
         match self {

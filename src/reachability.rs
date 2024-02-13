@@ -107,3 +107,17 @@ fn reachable_pc(entry: u64, flow: &HashMap<ProgramCounter, Vec<ProgramCounter>>)
 
     visited
 }
+
+pub fn transitions_set(
+    method: MethodIdentifier,
+    program: &HashMap<ProgramCounter, CFGStatement>,
+    flow: &HashMap<ProgramCounter, Vec<ProgramCounter>>,
+    st: &SymbolTable,
+) -> Vec<(u64, u64)> {
+    let reachability = reachability(method, program, flow, st);
+    let mut transitions: Vec<(u64, u64)> = Vec::new();
+    flow.into_iter()
+        .filter(|(k, _)| {reachability.contains(k)})
+        .for_each(|(k, l)| {l.into_iter().for_each(|v| transitions.push((*k, *v)))} );
+    transitions
+}

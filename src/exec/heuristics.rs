@@ -22,6 +22,7 @@ pub mod random_path;
 pub mod round_robin;
 pub mod concolic_execution;
 pub mod fuzzer;
+pub mod concrete_execution;
 
 type Cost = u64;
 pub type ProgramCounter = u64;

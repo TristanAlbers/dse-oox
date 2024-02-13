@@ -3,9 +3,10 @@
 use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
-    cfg::CFGStatement, exec::{self, eval::evaluate, exec_assume, heuristics::fuzzer::*}, statistics::Statistics, z3_checker, Expression, Identifier, Options, Statement, SymbolTable
+    cfg::CFGStatement, dsl::and, exec::{collect_path_constraints, eval::evaluate, exec_assume, heuristics::fuzzer::*}, reachability::transitions_set, statistics::Statistics, z3_checker, Expression, Options, Statement, SymbolTable
 };
 
+use im_rc::HashSet;
 use itertools::Either;
 use z3::SatResult;
 
@@ -18,7 +19,8 @@ use slog::Logger;
 pub(super) struct ConcolicExecution {
     rng: ThreadRng,
     input_constraints: Vec<Rc<Expression>>,
-    found_negations: Vec<Rc<Expression>>
+    found_negations: Vec<Rc<Expression>>,
+    coverage_tuples: Vec<(u64, u64)>
 }
 
 impl ConcolicExecution{
@@ -26,12 +28,17 @@ impl ConcolicExecution{
         ConcolicExecution {
             rng: rand::thread_rng(),
             input_constraints: constraints,
-            found_negations: Vec::new()
+            found_negations: Vec::new(),
+            coverage_tuples: Vec::new()
         }
     }
 
     pub(super) fn add_negation(&mut self, expr: Rc<Expression>) {
         self.found_negations.push(expr);
+    } 
+
+    pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
+        self.coverage_tuples.push(tuple);
     } 
 }
 
@@ -49,8 +56,8 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
             statistics: &mut Statistics,
             options: &Options,
         ) -> Rc<RefCell<ExecutionTree>> {
-            let leafs = ExecutionTree::leafs(root.clone());
-            let mut chosen = None;
+            let mut leafs = ExecutionTree::leafs(root.clone());
+            let mut chosen = leafs.pop();
             
             leafs.into_iter()
             .filter(
@@ -116,12 +123,12 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                                     // we are currently following. 
                                     // Might still be usefull if we regard these both as different paths since it is a valid negation
                                     // because we would otherwise never reach it again ..... Design choices for later
-                                    let expression = evaluate(state.borrow_mut(), assumption_expr, en);
+                                    // let expression = evaluate(state.borrow_mut(), assumption_expr, en);
 
-                                    // let constraints = collect_path_constraints(state);
-                                    // let assumption = evaluate(state, assumption, en);
-                                    // // dbg!(&assumption);
-                                    // let expression = evaluate(state, and(constraints, assumption.clone()), en);
+                                    let constraints = collect_path_constraints(&state);
+                                    let assumption = evaluate(&mut state, assumption_expr, en);
+                                    // dbg!(&assumption);
+                                    let expression = evaluate(&mut state, and(constraints, assumption.clone()), en);
 
                                     if *expression == Expression::FALSE {
                                         // Not feasible, even when input constraints are lifted
@@ -133,7 +140,8 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                                                 // feasible after lifting input constraints, should solve
 
                                                 self.add_negation(expression);
-                                                chosen = Some(Rc::clone(&x));
+                                                // chosen = Some(&x);
+                                                chosen = Some(Rc::clone(&x))
                                             }
                                         } else {
                                             // Not feasible, even when input constraints are lifted
@@ -155,11 +163,16 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
 
             // When encountering a solveable infeasibility call, choose that branch as the next to be executed
             // This prunes the infeasible branch, allowing us to trace the input further.
-            if let Some(option) = chosen{
-                return option
-            }
 
-            exec::heuristics::random_path::random_path(root, &mut self.rng)
+            let retval = chosen.unwrap();
+            // This is because of: Rc<RefCell<T>> containing a parent function which in itself is Weak<RefCell<T>>
+            // which needs to be upgraded and then unwrapped because is may contain "None" since it is Weak. Then
+            // a borrow must take place since we are working with the inner RefCell<T>.
+            let parent_statement = retval.borrow().parent().upgrade().unwrap_or_default().borrow().statement();
+            let child_statement = retval.borrow().statement();
+            self.add_coverage_tuple((parent_statement, child_statement));
+            return retval;
+            // self.add_coverage_tuple(retval.borrow().parent()
     }
 }
 
@@ -172,94 +185,200 @@ pub(crate) fn sym_exec(
     path_counter: Rc<RefCell<IdCounter<u64>>>,
     statistics: &mut Statistics,
     entry_method: crate::cfg::MethodIdentifier,
-    options: &Options,
+    options: &Options, 
 ) -> SymResult {
+
+    // Call fuzzer, wait for output
+    let mut fuzzer = RandomFuzzer::new();
+    let mut negation_owner;
+    let mut found_negations = None;
+    let total_transitions = transitions_set(entry_method.clone(), program, flows, st).len();
+    let mut total_coverage = HashSet::new();
+    let mut prev_precentage_coverage = 0.0;
+
+    loop {
+        println!("Concrete invoked");
+        let concrete_res = start_fuzzing(
+            &mut fuzzer,
+            &mut found_negations,
+            state.clone(), 
+            program, 
+            flows, 
+            st, 
+            root_logger.clone(), 
+            path_counter.clone(), 
+            statistics, 
+            entry_method.clone(), 
+            options
+        );
     
-    let mut state_first_run = state.clone();
+        match concrete_res {
+            Either::Left(symres) => return symres,
+            Either::Right((trace, found_transitions)) => {
+                println!("Concolic invoked");
+                
+                found_transitions.into_iter().for_each(|transition| {total_coverage.insert(transition);});
+                let cur_precentage_coverage = (total_coverage.len() as f32 / total_transitions as f32) * 100.0;
+
+                println!("Coverage: {:?}", cur_precentage_coverage);
+                
+                if cur_precentage_coverage <= prev_precentage_coverage {
+                    // Cannot progress further, is valid
+                    return SymResult::Valid
+                }
+
+                if cur_precentage_coverage > 90.0 {
+                    // Coverage is high enough to be valid.
+                    println!("Coverage higher than 90%");
+                    return SymResult::Valid
+                }
+
+                // Otherwise generate new input for the concrete execution.
+                prev_precentage_coverage = cur_precentage_coverage;
+                let mut loc_state = state.clone();
+                for input in trace.clone() {
+                    loc_state.constraints.insert(input);
+                }
+                let mut heuristic = ConcolicExecution::new(trace);
+                let _concolic_res = sym_exec_execution_tree(
+                    loc_state, 
+                    program, 
+                    flows, 
+                    st, 
+                    root_logger.clone(), 
+                    path_counter.clone(), 
+                    statistics, 
+                    entry_method.clone(), 
+                    &mut heuristic, 
+                    options
+                );
+                negation_owner = heuristic.found_negations.clone();
+                found_negations = Some(&mut negation_owner);
+            },
+        }
+    }
+    
+
+    // Do the trace and gather one or multiple inputs
+
+    // Repeat
+
+    /* 
+
+
+
     let mut fuzzer = Fuzzer::new(FuzzerType::EXPERIMENTAL);
     let stack_variables = state.stack.current_variables().unwrap();
 
-    let fuzzed_inputs = fuzzer.fuzz_inputs(stack_variables);
+    // make it run on a time budget.
+    let start_time = Instant::now();
 
-    // print initial fuzzed inputs
-    println!("Starting first run ...");
-    println!("Initial fuzzed inputs: {:?}", fuzzed_inputs);
+    let mut result = SymResult::Valid;
 
-    // Add input constraints according to fuzzer
-    for input in fuzzed_inputs.clone() {
-        state_first_run.constraints.insert(input);
-    }
+    let transition_set = transitions_set(entry_method.clone(), program, flows, st);
 
-    // Create reference to input constraints to be lifted later
-    let mut owner_heuristic = ConcolicExecution::new(fuzzed_inputs);
+    while start_time.elapsed().as_secs() < options.time_budget {
 
-    // Start First SymExe
-    let res = sym_exec_execution_tree(
-        state_first_run, // ToDo -- Remove clone()
-        program, 
-        flows, 
-        st, 
-        root_logger.clone(), 
-        path_counter.clone(), 
-        statistics, 
-        entry_method.clone(), 
-        &mut owner_heuristic, 
-        options
-    );
+        // Call fuzzer, wait for output
 
-    // printing result first run:
-    println!("First run returned: {:?}", res);
-    println!("Found negations: {:?}", owner_heuristic.found_negations);
+        // Do the trace and gather one or multiple inputs
 
-    // Resulting negations, should solve for new inputs in concolic part.
+        // Repeat
+        
+        let mut state_first_run = state.clone();
+        let fuzzed_inputs = fuzzer.fuzz_inputs(stack_variables);
 
-    let mut new_constraints: Vec<Rc<Expression>> = Vec::new();
+        // print initial fuzzed inputs
+        println!("Starting run ...");
+        println!("Fuzzed inputs: {:?}", fuzzed_inputs);
 
-    for expr in owner_heuristic.found_negations{
-        let (_, solve_str) = z3_checker::all_z3::verify(&expr, &state.alias_map);
+        // Add input constraints according to fuzzer
+        for input in fuzzed_inputs.clone() {
+            state_first_run.constraints.insert(input);
+        }
 
-        let new_values: Vec<&str> = solve_str.split("\n").filter(|s| s.len() > 0).collect();
+        // Create reference to input constraints to be lifted later
+        let mut owner_heuristic = ConcolicExecution::new(fuzzed_inputs);
 
-        for value_comb in new_values{
-            let key_value: Vec<&str> = value_comb.split(" -> ").collect();
-            assert!(key_value.len() == 2);
+        // Start First SymExe
+        let res = sym_exec_execution_tree(
+            state_first_run, 
+            program, 
+            flows, 
+            st, 
+            root_logger.clone(), 
+            path_counter.clone(), 
+            statistics, 
+            entry_method.clone(), 
+            &mut owner_heuristic, 
+            options
+        );
 
-            let pair: Vec<(&Identifier, &Rc<Expression>)> = stack_variables.into_iter().filter(|(k, _)| k.as_str() == *key_value.first().unwrap()).collect();
-            assert!(pair.len() == 1);
+        println!("Run returned: {:?}", res);
+        println!("Amount of transitions found are: {:?} of the total: {:?}", owner_heuristic.coverage_tuples.len(), transition_set.len());
 
-            let constr = fuzzer.create_constraint(*pair.first().unwrap(), ( key_value.first().unwrap().to_string(), key_value.last().unwrap().to_string()));
-            new_constraints.push(constr);
+        if let SymResult::Invalid(..) = res{
+            result = res;
+            break
         }
     }
 
-    // Second Run
-    println!("Starting second run ...");
-    println!("New inputs: {:?}", new_constraints);
+    result
+    */
+
+    // // printing result first run:
+    // println!("First run returned: {:?}", res);
+    // println!("Found negations: {:?}", owner_heuristic.found_negations);
+
+    // // Resulting negations, should solve for new inputs in concolic part.
+
+    // let mut new_constraints: Vec<Rc<Expression>> = Vec::new();
+
+    // for expr in owner_heuristic.found_negations{
+    //     let (_, solve_str) = z3_checker::all_z3::verify(&expr, &state.alias_map);
+
+    //     let new_values: Vec<&str> = solve_str.split("\n").filter(|s| s.len() > 0).collect();
+
+    //     for value_comb in new_values{
+    //         let key_value: Vec<&str> = value_comb.split(" -> ").collect();
+    //         assert!(key_value.len() == 2);
+
+    //         let pair: Vec<(&Identifier, &Rc<Expression>)> = stack_variables.into_iter().filter(|(k, _)| k.as_str() == *key_value.first().unwrap()).collect();
+    //         assert!(pair.len() == 1);
+
+    //         let constr = fuzzer.create_constraint(*pair.first().unwrap(), ( key_value.first().unwrap().to_string(), key_value.last().unwrap().to_string()));
+    //         new_constraints.push(constr);
+    //     }
+    // }
+
+    // // Second Run
+    // println!("Starting second run ...");
+    // println!("New inputs: {:?}", new_constraints);
     
-    // Reset constraints to new set
-    let mut owner_heuristic = ConcolicExecution::new(new_constraints.clone());
-    let mut state_second_run = state;
+    // // Reset constraints to new set
+    // let mut owner_heuristic = ConcolicExecution::new(new_constraints.clone());
+    // let mut state_second_run = state;
 
-    for input in new_constraints {
-        state_second_run.constraints.insert(input);
-    }
+    // for input in new_constraints {
+    //     state_second_run.constraints.insert(input);
+    // }
 
-    // SymExe
-    let second_res = sym_exec_execution_tree(
-        state_second_run,
-        program, 
-        flows, 
-        st, 
-        root_logger, 
-        path_counter, 
-        statistics, 
-        entry_method, 
-        &mut owner_heuristic, 
-        options
-    );
+    // // SymExe
+    // let second_res = sym_exec_execution_tree(
+    //     state_second_run,
+    //     program, 
+    //     flows, 
+    //     st, 
+    //     root_logger, 
+    //     path_counter, 
+    //     statistics, 
+    //     entry_method, 
+    //     &mut owner_heuristic, 
+    //     options
+    // );
 
-    println!("Finished second run ...");
-    second_res
+    // println!("Finished second run ...");
+    // second_res
 }
 
 
