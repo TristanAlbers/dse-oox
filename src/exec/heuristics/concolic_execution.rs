@@ -1,12 +1,12 @@
 
 
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::{HashMap, HashSet}, ops::Deref, rc::Rc};
 
 use crate::{
     cfg::CFGStatement, dsl::and, exec::{collect_path_constraints, eval::evaluate, exec_assume, heuristics::fuzzer::*}, reachability::transitions_set, statistics::Statistics, z3_checker, Expression, Options, Statement, SymbolTable
 };
 
-use im_rc::HashSet;
+// use im_rc::HashSet;
 use itertools::Either;
 use z3::SatResult;
 
@@ -14,27 +14,34 @@ use super::{
     execution_tree::{sym_exec_execution_tree, ExecutionTree, ExecutionTreeBasedHeuristic}, IdCounter, ProgramCounter, State, SymResult
 };
 use rand::rngs::ThreadRng;
-use slog::Logger;
+use slog::{info, Logger};
 
 pub(super) struct ConcolicExecution {
     rng: ThreadRng,
     input_constraints: Vec<Rc<Expression>>,
     found_negations: Vec<Rc<Expression>>,
-    coverage_tuples: Vec<(u64, u64)>
+    coverage_tuples: Vec<(u64, u64)>,
+    previously_found_transitions: HashSet<(u64, u64)>,
 }
 
 impl ConcolicExecution{
-    pub(super) fn new(constraints: Vec<Rc<Expression>>) -> ConcolicExecution {
+    pub(super) fn new(constraints: Vec<Rc<Expression>>, prev_transitons: &HashSet<(u64, u64)>) -> ConcolicExecution {
         ConcolicExecution {
             rng: rand::thread_rng(),
             input_constraints: constraints,
             found_negations: Vec::new(),
-            coverage_tuples: Vec::new()
+            coverage_tuples: Vec::new(),
+            previously_found_transitions: prev_transitons.to_owned(),
         }
     }
 
     pub(super) fn add_negation(&mut self, expr: Rc<Expression>) {
-        self.found_negations.push(expr);
+        if self.found_negations.len() < 1{
+            self.found_negations.push(expr);
+        } else {
+            let expr1 = self.found_negations.pop().unwrap();
+            self.found_negations.push(and(expr1, expr));
+        }
     } 
 
     pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
@@ -47,7 +54,7 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
             &mut self,
             root: Rc<RefCell<ExecutionTree>>,
             program: &HashMap<u64, CFGStatement>,
-            _flows: &HashMap<u64, Vec<u64>>,
+            flows: &HashMap<u64, Vec<u64>>,
             st: &SymbolTable,
             _entry_method: &crate::cfg::MethodIdentifier,
             _coverage: &mut HashMap<ProgramCounter, usize>,
@@ -56,36 +63,43 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
             statistics: &mut Statistics,
             options: &Options,
         ) -> Rc<RefCell<ExecutionTree>> {
-            let mut leafs = ExecutionTree::leafs(root.clone());
-            let mut chosen = leafs.pop();
+            let leafs = ExecutionTree::leafs(root.clone());
+            /*
+            println!("{:?}: {:?}", 52, program.get(&52).unwrap());
+            println!("{:?}: {:?}", 54, program.get(&52).unwrap());
+
+            println!("{:?}: {:?}", 74, program.get(&74).unwrap());
+            println!("{:?}: {:?}", 76, program.get(&76).unwrap());
+
+            println!("{:?}: {:?}", 82, program.get(&82).unwrap());
+            println!("{:?}: {:?}", 83, program.get(&83).unwrap());
+
+            println!("{:?}: {:?}", 44, program.get(&44).unwrap());
+            println!("{:?}: {:?}", 47, program.get(&47).unwrap());
+
+            panic!();
+            */
             
-            leafs.into_iter()
-            .filter(
-                |l|
-                if let CFGStatement::Statement( Statement::Assume { .. } ) = program.get(&l.borrow().statement()).unwrap() {
-                    true
+            for leaf in leafs.clone() {
+                let cur_statement = RefCell::borrow(&leaf).statement();
+                let mut covers_new_code = false;
+                if let Some(items) = flows.get(&cur_statement){
+                    for stmt in items{
+                        if !(self.previously_found_transitions.contains(&(cur_statement, *stmt))){
+                            covers_new_code = true;
+                        }
+                    }
                 } else {
-                    false
+                    covers_new_code = true;
                 }
-            )
-            .for_each(
-                |x|
-                {
-                    let cfg_statement = program.get(&x.borrow().statement()).unwrap();
+                if !covers_new_code { continue; }
 
-                    // idiotic auto reference issues see following link for explanation:
-                    // https://stackoverflow.com/questions/75021342/why-creating-a-local-binding-with-borrow-in-rust-makes-inferring-the-type-imposs
-                    let mut temp = RefCell::borrow_mut(&x);
+                match program.get(&cur_statement).unwrap() {
+                    CFGStatement::Statement( Statement::Assume { assumption, .. } ) => {
+                        let mut states = leaf.borrow_mut().take_states().unwrap();
+                        leaf.borrow_mut().set_states(states.clone());
+                        let mut target_state = states.pop().unwrap();
 
-                    let mut states = temp.take_states().unwrap();
-                    temp.set_states(states.clone());
-
-                    if states.len() > 1 { panic!("Should not happen")}
-                    let mut state = states.pop().unwrap();
-                    
-
-                    if let CFGStatement::Statement( Statement::Assume { assumption, .. } ) = cfg_statement {
-                        
                         let en = &mut crate::exec::EngineContext {
                             remaining_states: &mut states,
                             path_counter: path_counter.clone(),
@@ -95,84 +109,50 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                             options,
                         };
 
-                        let is_feasible_path = exec_assume(state.borrow_mut(), assumption.clone(), en);
+                        let is_feasible_path = exec_assume(&mut target_state, assumption.clone(), en);
                         
                         if !is_feasible_path{
 
                             // Lift the constraints on input to check if that is the cause of infeasibility
                             for constr in &self.input_constraints{
-                                state.constraints.remove(constr);
+                                target_state.constraints.remove(constr);
                             }
                             
                             // Solve for input leading to this specific branch
-
                             match assumption.clone() {
                                 Either::Left(assumption_expr) => {
-                                    // dbg!(assumption_expr);
-    
-                                    let en = &mut crate::exec::EngineContext {
-                                        remaining_states: &mut states,
-                                        path_counter: path_counter.clone(),
-                                        statistics,
-                                        st,
-                                        root_logger: &root_logger,
-                                        options,
-                                    };
-                                    
                                     // Only use the "assumption" here or otherwise we later create constraints for the "trace" which
                                     // we are currently following. 
                                     // Might still be usefull if we regard these both as different paths since it is a valid negation
                                     // because we would otherwise never reach it again ..... Design choices for later
-                                    // let expression = evaluate(state.borrow_mut(), assumption_expr, en);
 
-                                    let constraints = collect_path_constraints(&state);
-                                    let assumption = evaluate(&mut state, assumption_expr, en);
-                                    // dbg!(&assumption);
-                                    let expression = evaluate(&mut state, and(constraints, assumption.clone()), en);
+                                    // let constraints = collect_path_constraints(&target_state);
+                                    let expression = evaluate(&mut target_state, assumption_expr.clone(), en);
+                                    // let expression = evaluate(&mut target_state, and(constraints, assumption), en);
 
-                                    if *expression == Expression::FALSE {
-                                        // Not feasible, even when input constraints are lifted
-                                    } else {
-                                        let result: SatResult = z3_checker::all_z3::verify(&expression, &state.alias_map).0;
-                                        // eval_assertion(state, expression, en)
-                                        if result == SatResult::Sat {
-                                            if *expression != Expression::TRUE {
-                                                // feasible after lifting input constraints, should solve
-
-                                                self.add_negation(expression);
-                                                // chosen = Some(&x);
-                                                chosen = Some(Rc::clone(&x))
-                                            }
-                                        } else {
-                                            // Not feasible, even when input constraints are lifted
+                                    if !(*expression == Expression::FALSE) {
+                                        let result: SatResult = z3_checker::all_z3::verify(&expression, &target_state.alias_map).0;
+                                        if result == SatResult::Sat && *expression != Expression::TRUE {
+                                            // feasible after lifting input constraints, should solve
+                                            self.add_negation(dbg!(expression));
                                         }
                                     }
                                 }
                                 Either::Right(_assumption) => {
                                     // --Todo, instanceof calls are not handled.
                                     // Maybe they don't need to be handled since they don't add constraints to use input.
+                                    todo!("instanceof calls are not handled");
                                 }
                             }
                         }
 
-                        
-                    ()
-                    }
+                    },
+                    t@_ => (),
                 }
-            );
-
-            // When encountering a solveable infeasibility call, choose that branch as the next to be executed
-            // This prunes the infeasible branch, allowing us to trace the input further.
-
-            let retval = chosen.unwrap();
-            // This is because of: Rc<RefCell<T>> containing a parent function which in itself is Weak<RefCell<T>>
-            // which needs to be upgraded and then unwrapped because is may contain "None" since it is Weak. Then
-            // a borrow must take place since we are working with the inner RefCell<T>.
-            let parent_statement = retval.borrow().parent().upgrade().unwrap_or_default().borrow().statement();
-            let child_statement = retval.borrow().statement();
-            self.add_coverage_tuple((parent_statement, child_statement));
-            return retval;
-            // self.add_coverage_tuple(retval.borrow().parent()
+                return leaf;
+            }
+            
+            leafs[0].clone()
     }
 }
 
@@ -197,10 +177,11 @@ pub(crate) fn sym_exec(
     let mut prev_precentage_coverage = 0.0;
 
     loop {
-        println!("Concrete invoked");
+        info!(root_logger, "Concrete invoked");
         let concrete_res = start_fuzzing(
             &mut fuzzer,
             &mut found_negations,
+            &mut total_coverage,
             state.clone(), 
             program, 
             flows, 
@@ -214,24 +195,22 @@ pub(crate) fn sym_exec(
     
         match concrete_res {
             Either::Left(symres) => return symres,
-            Either::Right((trace, found_transitions)) => {
-                println!("Concolic invoked");
+            Either::Right(trace) => {
+                info!(root_logger, "Concolic invoked");
                 
-                found_transitions.into_iter().for_each(|transition| {total_coverage.insert(transition);});
+                // found_transitions.into_iter().for_each(|transition| {total_coverage.insert(transition);});
                 let cur_precentage_coverage = (total_coverage.len() as f32 / total_transitions as f32) * 100.0;
-
                 println!("Coverage: {:?}", cur_precentage_coverage);
                 
-                if cur_precentage_coverage <= prev_precentage_coverage {
-                    // Cannot progress further, is valid
-                    return SymResult::Valid
-                }
-
-                if cur_precentage_coverage > 90.0 {
-                    // Coverage is high enough to be valid.
-                    println!("Coverage higher than 90%");
-                    return SymResult::Valid
-                }
+                // if cur_precentage_coverage <= prev_precentage_coverage {
+                //     // Cannot progress further, is valid
+                //     return SymResult::Valid
+                // }
+                // if cur_precentage_coverage > 98.0 {
+                //     // Coverage is high enough to be valid.
+                //     println!("Coverage higher than 98%");
+                //     return SymResult::Valid
+                // }
 
                 // Otherwise generate new input for the concrete execution.
                 prev_precentage_coverage = cur_precentage_coverage;
@@ -239,7 +218,9 @@ pub(crate) fn sym_exec(
                 for input in trace.clone() {
                     loc_state.constraints.insert(input);
                 }
-                let mut heuristic = ConcolicExecution::new(trace);
+                let mut heuristic = ConcolicExecution::new(trace, &total_coverage);
+                let mut new_options = options.clone();
+                new_options.prune_path_z3 = true;
                 let _concolic_res = sym_exec_execution_tree(
                     loc_state, 
                     program, 
@@ -250,135 +231,13 @@ pub(crate) fn sym_exec(
                     statistics, 
                     entry_method.clone(), 
                     &mut heuristic, 
-                    options
+                    &new_options
                 );
                 negation_owner = heuristic.found_negations.clone();
                 found_negations = Some(&mut negation_owner);
             },
         }
     }
-    
-
-    // Do the trace and gather one or multiple inputs
-
-    // Repeat
-
-    /* 
-
-
-
-    let mut fuzzer = Fuzzer::new(FuzzerType::EXPERIMENTAL);
-    let stack_variables = state.stack.current_variables().unwrap();
-
-    // make it run on a time budget.
-    let start_time = Instant::now();
-
-    let mut result = SymResult::Valid;
-
-    let transition_set = transitions_set(entry_method.clone(), program, flows, st);
-
-    while start_time.elapsed().as_secs() < options.time_budget {
-
-        // Call fuzzer, wait for output
-
-        // Do the trace and gather one or multiple inputs
-
-        // Repeat
-        
-        let mut state_first_run = state.clone();
-        let fuzzed_inputs = fuzzer.fuzz_inputs(stack_variables);
-
-        // print initial fuzzed inputs
-        println!("Starting run ...");
-        println!("Fuzzed inputs: {:?}", fuzzed_inputs);
-
-        // Add input constraints according to fuzzer
-        for input in fuzzed_inputs.clone() {
-            state_first_run.constraints.insert(input);
-        }
-
-        // Create reference to input constraints to be lifted later
-        let mut owner_heuristic = ConcolicExecution::new(fuzzed_inputs);
-
-        // Start First SymExe
-        let res = sym_exec_execution_tree(
-            state_first_run, 
-            program, 
-            flows, 
-            st, 
-            root_logger.clone(), 
-            path_counter.clone(), 
-            statistics, 
-            entry_method.clone(), 
-            &mut owner_heuristic, 
-            options
-        );
-
-        println!("Run returned: {:?}", res);
-        println!("Amount of transitions found are: {:?} of the total: {:?}", owner_heuristic.coverage_tuples.len(), transition_set.len());
-
-        if let SymResult::Invalid(..) = res{
-            result = res;
-            break
-        }
-    }
-
-    result
-    */
-
-    // // printing result first run:
-    // println!("First run returned: {:?}", res);
-    // println!("Found negations: {:?}", owner_heuristic.found_negations);
-
-    // // Resulting negations, should solve for new inputs in concolic part.
-
-    // let mut new_constraints: Vec<Rc<Expression>> = Vec::new();
-
-    // for expr in owner_heuristic.found_negations{
-    //     let (_, solve_str) = z3_checker::all_z3::verify(&expr, &state.alias_map);
-
-    //     let new_values: Vec<&str> = solve_str.split("\n").filter(|s| s.len() > 0).collect();
-
-    //     for value_comb in new_values{
-    //         let key_value: Vec<&str> = value_comb.split(" -> ").collect();
-    //         assert!(key_value.len() == 2);
-
-    //         let pair: Vec<(&Identifier, &Rc<Expression>)> = stack_variables.into_iter().filter(|(k, _)| k.as_str() == *key_value.first().unwrap()).collect();
-    //         assert!(pair.len() == 1);
-
-    //         let constr = fuzzer.create_constraint(*pair.first().unwrap(), ( key_value.first().unwrap().to_string(), key_value.last().unwrap().to_string()));
-    //         new_constraints.push(constr);
-    //     }
-    // }
-
-    // // Second Run
-    // println!("Starting second run ...");
-    // println!("New inputs: {:?}", new_constraints);
-    
-    // // Reset constraints to new set
-    // let mut owner_heuristic = ConcolicExecution::new(new_constraints.clone());
-    // let mut state_second_run = state;
-
-    // for input in new_constraints {
-    //     state_second_run.constraints.insert(input);
-    // }
-
-    // // SymExe
-    // let second_res = sym_exec_execution_tree(
-    //     state_second_run,
-    //     program, 
-    //     flows, 
-    //     st, 
-    //     root_logger, 
-    //     path_counter, 
-    //     statistics, 
-    //     entry_method, 
-    //     &mut owner_heuristic, 
-    //     options
-    // );
-
-    // println!("Finished second run ...");
-    // second_res
 }
 
 

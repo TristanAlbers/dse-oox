@@ -149,7 +149,7 @@ fn evaluate_binop(bin_op: BinOp, lhs: Rc<Expression>, rhs: Rc<Expression>) -> Rc
     use crate::syntax::Lit::*;
     use Expression::*;
 
-    // dbg!(&bin_op, lhs, rhs);
+    // dbg!(&bin_op, &lhs, &rhs);
 
     match (bin_op, lhs.as_ref(), rhs.as_ref()) {
         // Boolean evaluation

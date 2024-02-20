@@ -1,0 +1,32 @@
+class Main {
+
+    static int check(int x, int depth)
+    {
+        if (depth >= 100){
+            return 0;
+        } else {
+            int count := 0;
+            if (x == 30) {
+                count := 1;
+            }
+            return count;
+        }
+    }
+    
+    static void main(int[] list)
+        requires(list != null && #list > 99)
+    {
+        int total_count := 0;
+        int i := 0;
+
+        while(i < #list){
+            int elem := list[i];
+            int cur_count := Main.check(elem, i);
+            total_count := total_count + cur_count;
+            i := i + 1;
+            if (total_count > 80) {
+                assert(false);
+            }
+        }
+    }
+}

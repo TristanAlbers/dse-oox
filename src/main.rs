@@ -1,4 +1,4 @@
-use std::{fs, time::Instant};
+use std::{fs, time::Instant, env};
 
 use clap::{Parser, Subcommand};
 use itertools::Itertools;
@@ -103,6 +103,7 @@ enum Commands {
 }
 
 fn main() -> Result<(), String> {
+    // env::set_var("RUST_BACKTRACE", "1");
     let args = Args::parse();
     match args.command {
         Commands::Verify {
