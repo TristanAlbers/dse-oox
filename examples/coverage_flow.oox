@@ -31,19 +31,20 @@ class Foo {
     static void test2(int x, bool z, int y)  {
         Foo myFoo := new Foo();
 
-        if (x > 3){
-            myFoo.y := -10;
+        if (x == 3){
+            myFoo.y := 2;
+            if (y == 3){
+                myFoo.y := -10;
+            }
         } else {
             myFoo.y := 2;
         }
 
-        if (z){
-            myFoo.y := -10;
-        }
+        // if (z){
+        //     myFoo.y := -10;
+        // }
 
-        if (y < 3){
-            myFoo.y := -10;
-        }
+        
 
         int q := myFoo.y;   // -10      --  2
         myFoo.y := q + 1;   // -9       --  3

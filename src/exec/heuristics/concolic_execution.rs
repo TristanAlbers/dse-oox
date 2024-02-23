@@ -1,6 +1,6 @@
 
 
-use std::{cell::RefCell, collections::{HashMap, HashSet}, ops::Deref, rc::Rc};
+use std::{cell::RefCell, collections::{HashMap, HashSet}, rc::Rc};
 
 use crate::{
     cfg::CFGStatement, dsl::and, exec::{collect_path_constraints, eval::evaluate, exec_assume, heuristics::fuzzer::*}, reachability::transitions_set, statistics::Statistics, z3_checker, Expression, Options, Statement, SymbolTable
@@ -14,7 +14,7 @@ use super::{
     execution_tree::{sym_exec_execution_tree, ExecutionTree, ExecutionTreeBasedHeuristic}, IdCounter, ProgramCounter, State, SymResult
 };
 use rand::rngs::ThreadRng;
-use slog::{info, Logger};
+use slog::{debug, info, Logger};
 
 pub(super) struct ConcolicExecution {
     rng: ThreadRng,
@@ -36,12 +36,7 @@ impl ConcolicExecution{
     }
 
     pub(super) fn add_negation(&mut self, expr: Rc<Expression>) {
-        if self.found_negations.len() < 1{
-            self.found_negations.push(expr);
-        } else {
-            let expr1 = self.found_negations.pop().unwrap();
-            self.found_negations.push(and(expr1, expr));
-        }
+        self.found_negations.push(expr);
     } 
 
     pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
@@ -64,21 +59,6 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
             options: &Options,
         ) -> Rc<RefCell<ExecutionTree>> {
             let leafs = ExecutionTree::leafs(root.clone());
-            /*
-            println!("{:?}: {:?}", 52, program.get(&52).unwrap());
-            println!("{:?}: {:?}", 54, program.get(&52).unwrap());
-
-            println!("{:?}: {:?}", 74, program.get(&74).unwrap());
-            println!("{:?}: {:?}", 76, program.get(&76).unwrap());
-
-            println!("{:?}: {:?}", 82, program.get(&82).unwrap());
-            println!("{:?}: {:?}", 83, program.get(&83).unwrap());
-
-            println!("{:?}: {:?}", 44, program.get(&44).unwrap());
-            println!("{:?}: {:?}", 47, program.get(&47).unwrap());
-
-            panic!();
-            */
             
             for leaf in leafs.clone() {
                 let cur_statement = RefCell::borrow(&leaf).statement();
@@ -126,15 +106,16 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                                     // Might still be usefull if we regard these both as different paths since it is a valid negation
                                     // because we would otherwise never reach it again ..... Design choices for later
 
-                                    // let constraints = collect_path_constraints(&target_state);
-                                    let expression = evaluate(&mut target_state, assumption_expr.clone(), en);
-                                    // let expression = evaluate(&mut target_state, and(constraints, assumption), en);
+                                    let constraints = collect_path_constraints(&target_state);
+                                    let assumption = evaluate(&mut target_state, assumption_expr.clone(), en);
+                                    let expression = evaluate(&mut target_state, and(constraints, assumption), en);
 
                                     if !(*expression == Expression::FALSE) {
                                         let result: SatResult = z3_checker::all_z3::verify(&expression, &target_state.alias_map).0;
                                         if result == SatResult::Sat && *expression != Expression::TRUE {
                                             // feasible after lifting input constraints, should solve
-                                            self.add_negation(dbg!(expression));
+                                            debug!(root_logger, "Negation found: {:?}", expression);
+                                            self.add_negation(expression);
                                         }
                                     }
                                 }
@@ -147,7 +128,7 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                         }
 
                     },
-                    t@_ => (),
+                    _ => (),
                 }
                 return leaf;
             }
@@ -175,9 +156,11 @@ pub(crate) fn sym_exec(
     let total_transitions = transitions_set(entry_method.clone(), program, flows, st).len();
     let mut total_coverage = HashSet::new();
     let mut prev_precentage_coverage = 0.0;
+    let concrete_options = default_concrete_options(options);
+    let concolic_options = default_concolic_options(options);
 
     loop {
-        info!(root_logger, "Concrete invoked");
+        info!(root_logger, "Concrete invoked"); println!("Concrete invoked");
         let concrete_res = start_fuzzing(
             &mut fuzzer,
             &mut found_negations,
@@ -190,27 +173,26 @@ pub(crate) fn sym_exec(
             path_counter.clone(), 
             statistics, 
             entry_method.clone(), 
-            options
+            &concrete_options
         );
-    
+        
         match concrete_res {
             Either::Left(symres) => return symres,
             Either::Right(trace) => {
-                info!(root_logger, "Concolic invoked");
+                info!(root_logger, "Concolic invoked"); println!("Concolic invoked");
                 
-                // found_transitions.into_iter().for_each(|transition| {total_coverage.insert(transition);});
                 let cur_precentage_coverage = (total_coverage.len() as f32 / total_transitions as f32) * 100.0;
                 println!("Coverage: {:?}", cur_precentage_coverage);
                 
-                // if cur_precentage_coverage <= prev_precentage_coverage {
-                //     // Cannot progress further, is valid
-                //     return SymResult::Valid
-                // }
-                // if cur_precentage_coverage > 98.0 {
-                //     // Coverage is high enough to be valid.
-                //     println!("Coverage higher than 98%");
-                //     return SymResult::Valid
-                // }
+                if cur_precentage_coverage <= prev_precentage_coverage {
+                    // Cannot progress further, is valid
+                    return SymResult::Valid
+                }
+                if cur_precentage_coverage > 98.0 {
+                    // Coverage is high enough to be valid.
+                    println!("Coverage higher than 98%");
+                    return SymResult::Valid
+                }
 
                 // Otherwise generate new input for the concrete execution.
                 prev_precentage_coverage = cur_precentage_coverage;
@@ -219,8 +201,6 @@ pub(crate) fn sym_exec(
                     loc_state.constraints.insert(input);
                 }
                 let mut heuristic = ConcolicExecution::new(trace, &total_coverage);
-                let mut new_options = options.clone();
-                new_options.prune_path_z3 = true;
                 let _concolic_res = sym_exec_execution_tree(
                     loc_state, 
                     program, 
@@ -231,15 +211,29 @@ pub(crate) fn sym_exec(
                     statistics, 
                     entry_method.clone(), 
                     &mut heuristic, 
-                    &new_options
+                    &concolic_options
                 );
                 negation_owner = heuristic.found_negations.clone();
                 found_negations = Some(&mut negation_owner);
             },
         }
     }
+
 }
 
+fn default_concrete_options<'a>(options: &'a Options<'a>) -> Options<'a>{
+    let mut new_options = options.clone();
+    new_options.prune_path_z3 = false;
+    new_options.local_solving_threshold = None;
+    new_options
+}
+
+fn default_concolic_options<'a>(options: &'a Options<'a>) -> Options<'a>{
+    let mut new_options = options.clone();
+    new_options.prune_path_z3 = true;
+    new_options.local_solving_threshold = Some(0);
+    new_options
+}
 
 
 

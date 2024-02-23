@@ -223,11 +223,11 @@ pub(super) fn sym_exec_execution_tree(
                     _n => {
                         // Branching, split up states
                         // We replace the leaf with a node at the branching statement, its children are the new paths each in a different direction.
-                        debug!(
-                            root_logger,
-                            "new states: {:?}",
-                            new_states.keys().collect_vec()
-                        );
+                        // debug!(
+                        //     root_logger,
+                        //     "new states: {:?}",
+                        //     new_states.keys().collect_vec()
+                        // );
 
                         let states = new_states
                             .into_iter()

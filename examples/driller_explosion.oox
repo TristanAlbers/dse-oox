@@ -14,7 +14,7 @@ class Main {
     }
     
     static void main(int[] list)
-        requires(list != null && #list > 99)
+        requires(list != null && #list > 20)
     {
         int total_count := 0;
         int i := 0;
@@ -24,7 +24,7 @@ class Main {
             int cur_count := Main.check(elem, i);
             total_count := total_count + cur_count;
             i := i + 1;
-            if (total_count > 80) {
+            if (total_count > 10) {
                 assert(false);
             }
         }

@@ -1,4 +1,4 @@
-use std::{fs, time::Instant, env};
+use std::{fs, time::Instant};
 
 use clap::{Parser, Subcommand};
 use itertools::Itertools;

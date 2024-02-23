@@ -110,7 +110,7 @@ impl Debug for State {
         f.debug_struct("State")
             .field("pc", &self.pc)
             .field("stack", &self.stack)
-            // .field("heap", &self.heap)
+            .field("heap", &self.heap)
             // .field("precondition", &self.precondition)
             // .field("constraints", &self.constraints)
             // .field("alias_map", &self.alias_map)
@@ -258,12 +258,12 @@ fn action(
 
     //use language::prettyprint::cfg_pretty;
 
-    debug!(state.logger, "Action {}", action;
-     "stack" => ?state.stack.current_stackframe(),
-     "heap" => ?state.heap,
-     "alias_map" => ?state.alias_map,
-     "constraints" => ?state.constraints,
-    );
+    // debug!(state.logger, "Action {}", action;
+    //  "stack" => ?state.stack.current_stackframe(),
+    //  "heap" => ?state.heap,
+    //  "alias_map" => ?state.alias_map,
+    //  "constraints" => ?state.constraints,
+    // );
 
     match action {
         CFGStatement::Statement(Statement::Declare { type_, var, .. }) => {
