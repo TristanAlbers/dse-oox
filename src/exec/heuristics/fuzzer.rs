@@ -19,8 +19,24 @@ pub(crate) enum FuzzerType{
 }
 
 pub(crate) trait Fuzz {
-    fn fuzz_inputs(&mut self, state: &State, inputs: &HashMap<Identifier, Rc<Expression>>, coverage: Option<Vec<(u64,u64)>>, found_negations: &mut Option<&mut Vec<Rc<Expression>>>, am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, requirements: Option<Rc<Expression>>, st: &SymbolTable) -> (Vec<Rc<Expression>>, State);
-    fn fuzz_inputs_from_negations(&mut self, state: &mut State, inputs: &HashMap<Identifier, Rc<Expression>>, negations: &mut Vec<Rc<Expression>>, am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, fuzzed_inputs: Vec<Rc<Expression>>) -> Vec<Rc<Expression>>;
+    fn fuzz_inputs(
+        &mut self, 
+        state: &State, 
+        inputs: &HashMap<Identifier, Rc<Expression>>, 
+        max_array_size: u64, 
+        found_negations: &mut Option<&mut Vec<Rc<Expression>>>, 
+        am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, 
+        requirements: Option<Rc<Expression>>, 
+        st: &SymbolTable
+    ) -> (Vec<Rc<Expression>>, State);
+    fn fuzz_inputs_from_negations(
+        &mut self, 
+        state: &mut State, 
+        inputs: &HashMap<Identifier, Rc<Expression>>, 
+        negations: &mut Vec<Rc<Expression>>, 
+        am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, 
+        fuzzed_inputs: Vec<Rc<Expression>>
+    ) -> Vec<Rc<Expression>>;
     fn set_latest_input(&mut self, inputs: Vec<Rc<Expression>>);
     fn get_latest_input(&self) -> Vec<Rc<Expression>>;
 }
@@ -48,6 +64,7 @@ impl Fuzz for RandomFuzzer{
             let key_value: Vec<&str> = value_comb.split(" -> ").collect();
             constrained_inputs.insert(key_value[0]);
             assert!(key_value.len() == 2);
+            let clean_value_str = key_value[1].replace(&[' ','\n','(', ')'][..], "");
             
             let pair: Vec<(&Identifier, &Rc<Expression>)> = inputs.into_iter().filter(|(k, _)| k.as_str() == *key_value.first().unwrap()).collect();
             if pair.len() != 1 {
@@ -66,14 +83,14 @@ impl Fuzz for RandomFuzzer{
                 .unwrap_or_else(|| panic!("expected array ref, found expr {:?}", &ref_));
 
                 let new_id = Identifier::from(key_value[0]);
-                let rhs= Rc::new(Expression::Lit { lit: IntLit { int_value: key_value[1].parse::<i64>().unwrap() }, type_ : IntRuntimeType, info: UnknownPosition });  
+                let rhs= Rc::new(Expression::Lit { lit: IntLit { int_value: clean_value_str.parse::<i64>().unwrap() }, type_ : IntRuntimeType, info: UnknownPosition });  
 
                 write_elem_concrete_index(state, ref_, index, rhs.clone());
                 new_constraints.push(self.create_input_expression(IntRuntimeType, rhs, &new_id));
 
             } else {
                 if let ArrayRuntimeType { .. } = pair[0].1.type_of()  { continue; }
-                let constr = self.create_constraint(state, *pair.first().unwrap(), key_value[1].to_string());
+                let constr = self.create_constraint(state, *pair.first().unwrap(), clean_value_str);
                 new_constraints.push(constr);
             }
         }
@@ -95,7 +112,16 @@ impl Fuzz for RandomFuzzer{
         new_constraints
     }
 
-    fn fuzz_inputs(&mut self, state: &State, inputs: &HashMap<Identifier, Rc<Expression>>, _coverage: Option<Vec<(u64,u64)>>, found_negations: &mut Option<&mut Vec<Rc<Expression>>>, am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, requirements: Option<Rc<Expression>>, st: &SymbolTable) -> (Vec<Rc<Expression>>, State){
+    fn fuzz_inputs(
+        &mut self, 
+        state: &State, 
+        inputs: &HashMap<Identifier, Rc<Expression>>, 
+        max_array_size: u64, 
+        found_negations: &mut Option<&mut Vec<Rc<Expression>>>,
+        am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, 
+        requirements: Option<Rc<Expression>>, 
+        st: &SymbolTable
+    ) -> (Vec<Rc<Expression>>, State){
         let mut fuzzed_inputs: Vec<Rc<Expression>> = Vec::new();
         let mut new_state = state.clone();
         inputs.into_iter().for_each(
@@ -136,13 +162,15 @@ impl Fuzz for RandomFuzzer{
                     t@ArrayRuntimeType { .. } => { // We assume only Int arrays are allowed since other arrays are not implemented yet (?)
                         if requirements.is_none() {todo!("Figure out how to fuzz array with unknown size")}
                         
-                        if let Some(expr) = requirements.borrow() {
-                            let array_size_range = get_array_size(expr.clone(), id);
+                        if let Some(_expr) = requirements.borrow() {
+
+                            /*let array_size_range = get_array_size(expr.clone(), id);
                             assert!(array_size_range.is_some());
                             // This solving could be optimized. Lot CAN go wrong
                             let (_, solve_str) = z3_checker::all_z3::verify(array_size_range.unwrap().deref(), &am);
                             let clean_str = solve_str.replace(&[' ','\n'][..], "");
-                            let size = clean_str.split("->").collect::<Vec<&str>>().last().unwrap().parse::<u64>().unwrap();
+                            let size = clean_str.split("->").collect::<Vec<&str>>().last().unwrap().parse::<u64>().unwrap();*/
+                            let size = max_array_size;
                             
                             // Constrain all elements with random input
                             let inner_type = match t.clone() {
@@ -208,31 +236,31 @@ impl RandomFuzzer{
         match expr.type_of() {
             t@IntRuntimeType => 
             {
-                let rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: new_value.parse::<i64>().unwrap() }, type_ : t.clone(), info: UnknownPosition });
+                let rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: new_value.parse::<i64>().expect(&format!("Parsing Error {:?}", new_value)) }, type_ : t.clone(), info: UnknownPosition });
                 state.stack.insert_variable(id.clone(), rhs.clone());
                 self.create_input_expression(t, rhs, id)
             },
             t@UIntRuntimeType => 
             {
-                let rhs = Rc::new(Expression::Lit { lit: UIntLit { uint_value: new_value.parse::<u64>().unwrap() }, type_ : t.clone(), info: UnknownPosition });
+                let rhs = Rc::new(Expression::Lit { lit: UIntLit { uint_value: new_value.parse::<u64>().expect(&format!("Parsing Error {:?}", new_value)) }, type_ : t.clone(), info: UnknownPosition });
                 state.stack.insert_variable(id.clone(), rhs.clone());
                 self.create_input_expression(t, rhs, id)
             },
             t@CharRuntimeType => 
             {
-                let rhs = Rc::new(Expression::Lit { lit: CharLit { char_value: new_value.parse::<char>().unwrap() }, type_ : t.clone(), info: UnknownPosition });
+                let rhs = Rc::new(Expression::Lit { lit: CharLit { char_value: new_value.parse::<char>().expect(&format!("Parsing Error {:?}", new_value)) }, type_ : t.clone(), info: UnknownPosition });
                 state.stack.insert_variable(id.clone(), rhs.clone());
                 self.create_input_expression(t, rhs, id)
             },
             t@BoolRuntimeType => 
             {
-                let rhs = Rc::new(Expression::Lit { lit: BoolLit { bool_value: new_value.parse::<bool>().unwrap() }, type_ : t.clone(), info: UnknownPosition });
+                let rhs = Rc::new(Expression::Lit { lit: BoolLit { bool_value: new_value.parse::<bool>().expect(&format!("Parsing Error {:?}", new_value)) }, type_ : t.clone(), info: UnknownPosition });
                 state.stack.insert_variable(id.clone(), rhs.clone());
                 self.create_input_expression(t, rhs, id)
             },
             t@FloatRuntimeType => 
             {
-                let rhs = Rc::new(Expression::Lit { lit: FloatLit { float_value: NotNan::new(new_value.parse::<f64>().unwrap()).unwrap() }, type_ : t.clone(), info: UnknownPosition });
+                let rhs = Rc::new(Expression::Lit { lit: FloatLit { float_value: NotNan::new(new_value.parse::<f64>().expect(&format!("Parsing Error {:?}", new_value))).unwrap() }, type_ : t.clone(), info: UnknownPosition });
                 state.stack.insert_variable(id.clone(), rhs.clone());
                 self.create_input_expression(t, rhs, id)
             },
@@ -304,9 +332,10 @@ pub(crate) fn start_fuzzing(
             if let Some((requires, _type_guard)) = current_member.requires() {
                 requirements = Some(requires.clone());
             }
+    options.symbolic_array_size;
     let stack_variables = state.stack.current_variables().unwrap();
     let alias_map: im_rc::HashMap<Identifier, crate::exec::AliasEntry> = state.alias_map.clone();
-    let (mut fuzzed_inputs, mut fuzzed_state) = fuzzer.fuzz_inputs(&state, stack_variables, None, found_negations, alias_map.clone(), requirements.clone(), st);
+    let (mut fuzzed_inputs, mut fuzzed_state) = fuzzer.fuzz_inputs(&state, stack_variables, options.symbolic_array_size, found_negations, alias_map.clone(), requirements.clone(), st);
     let total_found_transitions = prev_found_transitions;
 
     loop{
@@ -340,7 +369,7 @@ pub(crate) fn start_fuzzing(
                 // println!("Stuck counter: {:?}", stuck_counter);
                 if stuck_counter > 5 { return Either::Right(fuzzer.get_latest_input()) };
                 // Choose new fuzzing inputs (random or based on other inputs)
-                (fuzzed_inputs, fuzzed_state) = fuzzer.fuzz_inputs(&state,stack_variables, Some(heuristic.coverage_tuples), found_negations, alias_map.clone(), requirements.clone(), st);
+                (fuzzed_inputs, fuzzed_state) = fuzzer.fuzz_inputs(&state,stack_variables, options.symbolic_array_size, found_negations, alias_map.clone(), requirements.clone(), st);
             },
             // Return Invalid when violation is found
             SymResult::Invalid(..) => return Either::Left(res),
