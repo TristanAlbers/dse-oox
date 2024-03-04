@@ -1,0 +1,1084 @@
+------------------------------------------------------------------------
+Validating BellmanFord-FunSat01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             4.9073742s
+  #branches:        899
+  #prunes:          898
+  #complete_paths:  1
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  898
+  #coverage:        27/164 (16.5%)
+
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 13.218391
+Concrete invoked
+Concolic invoked
+Coverage: 18.390804
+Concrete invoked
+Concolic invoked
+Coverage: 18.390804
+Statistics
+  Final result:     VALID
+  time:             63.2189389s
+  #branches:        1897
+  #prunes:          1916
+  #complete_paths:  2
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  1896
+  #coverage:        27/164 (16.5%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating BinaryTreeSearch-FunSat01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             16.8319631s
+  #branches:        1010
+  #prunes:          992
+  #complete_paths:  18
+  #locally_solved:  16
+  #Z3 invocations:  0
+  #paths explored:  1009
+  #coverage:        95/134 (70.9%)
+
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 59.71223
+Concrete invoked
+Concolic invoked
+Coverage: 76.258995
+Concrete invoked
+Concolic invoked
+Coverage: 76.258995
+Statistics
+  Final result:     VALID
+  time:             106.5863227s
+  #branches:        13924
+  #prunes:          13926
+  #complete_paths:  19
+  #locally_solved:  13
+  #Z3 invocations:  0
+  #paths explored:  13923
+  #coverage:        94/134 (70.1%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating BinaryTreeSearch-FunUnsat01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\algorithms\working\BinaryTreeSearch-FunUnsat01.oox:91:14
+  time:             0.4963156s
+  #branches:        24
+  #prunes:          20
+  #complete_paths:  2
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  23
+  #coverage:        102/140 (72.9%)
+
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 63.013695
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\algorithms\working\BinaryTreeSearch-FunUnsat01.oox:91:14
+  time:             1.1055885s
+  #branches:        949
+  #prunes:          942
+  #complete_paths:  9
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  948
+  #coverage:        105/140 (75.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating RedBlackTree-FunSat01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             120.9874436s
+  #branches:        562
+  #prunes:          510
+  #complete_paths:  52
+  #locally_solved:  21
+  #Z3 invocations:  0
+  #paths explored:  561
+  #coverage:        426/721 (59.1%)
+
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 78.02198
+Concrete invoked
+Concolic invoked
+Coverage: 78.43407
+Concrete invoked
+Concolic invoked
+Coverage: 88.32418
+Concrete invoked
+Concolic invoked
+Coverage: 90.65934
+Concrete invoked
+Concolic invoked
+Coverage: 90.65934
+Statistics
+  Final result:     VALID
+  time:             121.0324134s
+  #branches:        11830
+  #prunes:          11847
+  #complete_paths:  20
+  #locally_solved:  6
+  #Z3 invocations:  0
+  #paths explored:  11829
+  #coverage:        433/721 (60.1%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating RedBlackTree-FunUnsat01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\algorithms\working\RedBlackTree-FunUnsat01.oox:456:13
+  time:             3.0805136s
+  #branches:        31
+  #prunes:          26
+  #complete_paths:  2
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  30
+  #coverage:        159/718 (22.1%)
+  
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 78.344826
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\algorithms\working\RedBlackTree-FunUnsat01.oox:456:13
+  time:             33.2712132s
+  #branches:        2880
+  #prunes:          2590
+  #complete_paths:  4
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  2879
+  #coverage:        421/718 (58.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating Ackermann01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\Ackermann01.oox:25:14
+  time:             0.1383177s
+  #branches:        6
+  #prunes:          0
+  #complete_paths:  1
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  5
+  #coverage:        33/42 (78.6%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 13.333334
+Concrete invoked
+Concolic invoked
+Coverage: 28.88889
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\Ackermann01.oox:25:14
+  time:             0.3752887s
+  #branches:        23
+  #prunes:          21
+  #complete_paths:  16
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  22
+  #coverage:        26/42 (61.9%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating Addition.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             146.2057124s
+  #branches:        5469
+  #prunes:          0
+  #complete_paths:  5469
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  5468
+  #coverage:        32/34 (94.1%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 16.666668
+Concrete invoked
+Concolic invoked
+Coverage: 36.11111
+Concrete invoked
+Concolic invoked
+Coverage: 69.44444
+Concrete invoked
+Concolic invoked
+Coverage: 97.22222
+Concrete invoked
+Concolic invoked
+Coverage: 97.22222
+Statistics
+  Final result:     VALID
+  time:             1.3728656s
+  #branches:        63
+  #prunes:          62
+  #complete_paths:  38
+  #locally_solved:  4
+  #Z3 invocations:  0
+  #paths explored:  62
+  #coverage:        31/34 (91.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating InfiniteLoop.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\InfiniteLoop.oox:7:14
+  time:             0.0515206s
+  #branches:        2
+  #prunes:          1
+  #complete_paths:  0
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  1
+  #coverage:        8/9 (88.9%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\InfiniteLoop.oox:7:14
+  time:             0.012349s
+  #branches:        2
+  #prunes:          0
+  #complete_paths:  0
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  1
+  #coverage:        7/9 (77.8%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatAckermann01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             134.8626985s
+  #branches:        6640
+  #prunes:          3219
+  #complete_paths:  3421
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  6639
+  #coverage:        24/28 (85.7%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 7.1428576
+Concrete invoked
+Concolic invoked
+Coverage: 10.714286
+Concrete invoked
+Concolic invoked
+Coverage: 46.42857
+Concrete invoked
+Concolic invoked
+Coverage: 82.14286
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Statistics
+  Final result:     VALID
+  time:             2.0235523s
+  #branches:        66
+  #prunes:          99
+  #complete_paths:  12
+  #locally_solved:  11
+  #Z3 invocations:  0
+  #paths explored:  65
+  #coverage:        28/28 (100.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatAckermann02.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             133.7042936s
+  #branches:        6444
+  #prunes:          3117
+  #complete_paths:  3327
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  6443
+  #coverage:        24/28 (85.7%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 7.1428576
+Concrete invoked
+Concolic invoked
+Coverage: 10.714286
+Concrete invoked
+Concolic invoked
+Coverage: 46.42857
+Concrete invoked
+Concolic invoked
+Coverage: 82.14286
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Statistics
+  Final result:     VALID
+  time:             1.9852047000000002s
+  #branches:        66
+  #prunes:          99
+  #complete_paths:  12
+  #locally_solved:  9
+  #Z3 invocations:  0
+  #paths explored:  65
+  #coverage:        28/28 (100.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatAckermann03.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             132.7635686s
+  #branches:        6347
+  #prunes:          3075
+  #complete_paths:  3272
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  6346
+  #coverage:        24/28 (85.7%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 7.1428576
+Concrete invoked
+Concolic invoked
+Coverage: 10.714286
+Concrete invoked
+Concolic invoked
+Coverage: 46.42857
+Concrete invoked
+Concolic invoked
+Coverage: 82.14286
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Concrete invoked
+Concolic invoked
+Coverage: 114.28572
+Statistics
+  Final result:     VALID
+  time:             2.0497076s
+  #branches:        66
+  #prunes:          99
+  #complete_paths:  12
+  #locally_solved:  9
+  #Z3 invocations:  0
+  #paths explored:  65
+  #coverage:        28/28 (100.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatAddition01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             147.9258419s
+  #branches:        5370
+  #prunes:          0
+  #complete_paths:  5370
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  5369
+  #coverage:        35/37 (94.6%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 15.000001
+Concrete invoked
+Concolic invoked
+Coverage: 32.5
+Concrete invoked
+Concolic invoked
+Coverage: 72.5
+Concrete invoked
+Concolic invoked
+Coverage: 92.5
+Concrete invoked
+Concolic invoked
+Coverage: 92.5
+Statistics
+  Final result:     VALID
+  time:             1.787892s
+  #branches:        69
+  #prunes:          68
+  #complete_paths:  38
+  #locally_solved:  4
+  #Z3 invocations:  0
+  #paths explored:  68
+  #coverage:        33/37 (89.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatEvenOdd01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 60.000004
+Concrete invoked
+Concolic invoked
+Coverage: 84.0
+Concrete invoked
+Concolic invoked
+Coverage: 92.0
+Concrete invoked
+Concolic invoked
+Coverage: 104.0
+Concrete invoked
+Concolic invoked
+Coverage: 110.0
+Concrete invoked
+Concolic invoked
+Coverage: 112.0
+Concrete invoked
+Concolic invoked
+Coverage: 112.0
+Statistics
+  Final result:     VALID
+  time:             20.5284982s
+  #branches:        15146
+  #prunes:          15145
+  #complete_paths:  57
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  15145
+  #coverage:        44/47 (93.6%)
+------------------------------------------------------------------------
+Validating SatFibonacci01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 65.625
+Concrete invoked
+Concolic invoked
+Coverage: 65.625
+Statistics
+  Final result:     VALID
+  time:             0.1726835s
+  #branches:        37
+  #prunes:          36
+  #complete_paths:  16
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  36
+  #coverage:        20/30 (66.7%)
+------------------------------------------------------------------------
+Validating SatFibonacci02.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             0.2417432s
+  #branches:        199
+  #prunes:          198
+  #complete_paths:  1
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  198
+  #coverage:        25/26 (96.2%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 122.22222
+Concrete invoked
+Concolic invoked
+Coverage: 122.22222
+Statistics
+  Final result:     VALID
+  time:             9.2803632s
+  #branches:        2773
+  #prunes:          2772
+  #complete_paths:  14
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  2772
+  #coverage:        25/26 (96.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatFibonacci03.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 65.625
+Concrete invoked
+Concolic invoked
+Coverage: 118.75
+------------------------------------------------------------------------
+Validating SatGcd.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             143.507902s
+  #branches:        4823
+  #prunes:          0
+  #complete_paths:  4823
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  4822
+  #coverage:        44/46 (95.7%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 12.0
+Concrete invoked
+Concolic invoked
+Coverage: 26.0
+Concrete invoked
+Concolic invoked
+Coverage: 66.0
+Concrete invoked
+Concolic invoked
+Coverage: 90.0
+Concrete invoked
+Concolic invoked
+Coverage: 96.0
+Concrete invoked
+Concolic invoked
+Coverage: 96.0
+Statistics
+  Final result:     VALID
+  time:             3.1000829s
+  #branches:        124
+  #prunes:          123
+  #complete_paths:  47
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  123
+  #coverage:        44/46 (95.7%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating SatHanoi01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+------------------------------------------------------------------------
+Validating SatMccarthy91.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 100.0
+Concrete invoked
+Concolic invoked
+Coverage: 120.00001
+Concrete invoked
+Concolic invoked
+Coverage: 120.00001
+Statistics
+  Final result:     VALID
+  time:             8.6737154s
+  #branches:        7742
+  #prunes:          7731
+  #complete_paths:  33
+  #locally_solved:  11
+  #Z3 invocations:  0
+  #paths explored:  7741
+  #coverage:        16/16 (100.0%)
+------------------------------------------------------------------------
+Validating SatPrimes01.oox
+[min-dist2-uncovered]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             143.9207377s
+  #branches:        4265
+  #prunes:          2
+  #complete_paths:  4263
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  4264
+  #coverage:        106/117 (90.6%)
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 4.7244096
+Concrete invoked
+Concolic invoked
+Coverage: 42.519684
+------------------------------------------------------------------------
+Validating UnsatAckermann01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             133.6274645s
+  #branches:        6816
+  #prunes:          3302
+  #complete_paths:  3514
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  6815
+  #coverage:        22/26 (84.6%)
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 69.230774
+------------------------------------------------------------------------
+Validating UnsatAddition01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     VALID
+  time:             149.996911s
+  #branches:        5887
+  #prunes:          0
+  #complete_paths:  5887
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  5886
+  #coverage:        22/24 (91.7%)
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 64.0
+------------------------------------------------------------------------
+Validating UnsatAddition02.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\UnsatAddition02.oox:24:12
+  time:             0.0370273s
+  #branches:        1
+  #prunes:          0
+  #complete_paths:  0
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  0
+  #coverage:        6/7 (85.7%)
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\UnsatAddition02.oox:24:12
+  time:             0.0249352s
+  #branches:        1
+  #prunes:          0
+  #complete_paths:  0
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  0
+  #coverage:        6/7 (85.7%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating UnsatEvenOdd01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\UnsatEvenOdd01.oox:34:14
+  time:             0.086296s
+  #branches:        6
+  #prunes:          1
+  #complete_paths:  1
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  5
+  #coverage:        29/47 (61.7%)
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 60.000004
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\UnsatEvenOdd01.oox:34:14
+  time:             4.4822144s
+  #branches:        4007
+  #prunes:          4005
+  #complete_paths:  10
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  4006
+  #coverage:        39/47 (83.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating UnsatFibonacci01.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 84.0
+Concrete invoked
+Concolic invoked
+Coverage: 96.0
+Concrete invoked
+Concolic invoked
+Coverage: 108.00001
+Concrete invoked
+Concolic invoked
+Coverage: 128.0
+Concrete invoked
+Concolic invoked
+Coverage: 128.0
+Statistics
+  Final result:     VALID
+  time:             16.360155s
+  #branches:        13100
+  #prunes:          13086
+  #complete_paths:  52
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  13099
+  #coverage:        23/24 (95.8%)
+------------------------------------------------------------------------
+Validating UnsatFibonacci02.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 84.0
+------------------------------------------------------------------------
+Validating UnsatMccarthy91.oox
+[min-dist2-uncovered]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Statistics
+  Final result:     INVALID at verification-tasks\jayhorn-recursive\UnsatMccarthy91.oox:13:12
+  time:             0.0478005s
+  #branches:        2
+  #prunes:          0
+  #complete_paths:  0
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  1
+  #coverage:        12/16 (75.0%)
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 100.0

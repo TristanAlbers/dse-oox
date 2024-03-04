@@ -1,0 +1,690 @@
+------------------------------------------------------------------------
+Validating spec1-5_product10_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product10_Unsat.oox:258:18
+  time:             0.7327421s
+  #branches:        221
+  #prunes:          170
+  #complete_paths:  13
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  220
+  #coverage:        421/510 (82.5%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product11_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product11_Unsat.oox:262:18
+  time:             0.6139755s
+  #branches:        99
+  #prunes:          43
+  #complete_paths:  7
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  98
+  #coverage:        377/520 (72.5%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product12_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product12_Unsat.oox:264:18
+  time:             0.6509147s
+  #branches:        280
+  #prunes:          244
+  #complete_paths:  23
+  #locally_solved:  2
+  #Z3 invocations:  0
+  #paths explored:  279
+  #coverage:        442/523 (84.5%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product13_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product13_Unsat.oox:264:18
+  time:             0.6034674s
+  #branches:        50
+  #prunes:          18
+  #complete_paths:  4
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  49
+  #coverage:        296/532 (55.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product14_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product14_Unsat.oox:266:18
+  time:             0.6318156s
+  #branches:        72
+  #prunes:          26
+  #complete_paths:  2
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  71
+  #coverage:        312/535 (58.3%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product15_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 108.45865
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product15_Unsat.oox:270:18
+  time:             7.8136263s
+  #branches:        1150
+  #prunes:          1008
+  #complete_paths:  122
+  #locally_solved:  7
+  #Z3 invocations:  0
+  #paths explored:  1149
+  #coverage:        459/542 (84.7%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product16_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product16_Unsat.oox:272:18
+  time:             0.6417569s
+  #branches:        73
+  #prunes:          22
+  #complete_paths:  4
+  #locally_solved:  2
+  #Z3 invocations:  0
+  #paths explored:  72
+  #coverage:        340/545 (62.4%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product1_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product1_Unsat.oox:244:18
+  time:             0.5935287s
+  #branches:        121
+  #prunes:          46
+  #complete_paths:  7
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  120
+  #coverage:        354/507 (69.8%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product2_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product2_Unsat.oox:246:18
+  time:             0.5150815s
+  #branches:        63
+  #prunes:          24
+  #complete_paths:  4
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  62
+  #coverage:        299/510 (58.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product3_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product3_Unsat.oox:250:18
+  time:             0.6217741s
+  #branches:        173
+  #prunes:          119
+  #complete_paths:  18
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  172
+  #coverage:        438/520 (84.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product48_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product48_Unsat.oox:264:18
+  time:             1.1142914s
+  #branches:        805
+  #prunes:          708
+  #complete_paths:  58
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  804
+  #coverage:        512/583 (87.8%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product49_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product49_Unsat.oox:264:18
+  time:             0.7738832s
+  #branches:        203
+  #prunes:          166
+  #complete_paths:  14
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  202
+  #coverage:        485/583 (83.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product4_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product4_Unsat.oox:252:18
+  time:             0.6284304s
+  #branches:        204
+  #prunes:          144
+  #complete_paths:  16
+  #locally_solved:  2
+  #Z3 invocations:  0
+  #paths explored:  203
+  #coverage:        435/523 (83.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product50_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product50_Unsat.oox:266:18
+  time:             1.056751s
+  #branches:        741
+  #prunes:          656
+  #complete_paths:  57
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  740
+  #coverage:        512/586 (87.4%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product51_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product51_Unsat.oox:270:18
+  time:             0.8829581s
+  #branches:        452
+  #prunes:          385
+  #complete_paths:  51
+  #locally_solved:  3
+  #Z3 invocations:  0
+  #paths explored:  451
+  #coverage:        531/593 (89.5%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product52_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product52_Unsat.oox:272:18
+  time:             0.7700258s
+  #branches:        112
+  #prunes:          53
+  #complete_paths:  6
+  #locally_solved:  2
+  #Z3 invocations:  0
+  #paths explored:  111
+  #coverage:        489/596 (82.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product53_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product53_Unsat.oox:264:18
+  time:             0.8314543s
+  #branches:        332
+  #prunes:          279
+  #complete_paths:  25
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  331
+  #coverage:        498/594 (83.8%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product54_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product54_Unsat.oox:266:18
+  time:             1.3933652s
+  #branches:        1147
+  #prunes:          1059
+  #complete_paths:  71
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  1146
+  #coverage:        523/597 (87.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product55_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product55_Unsat.oox:270:18
+  time:             0.7323855s
+  #branches:        241
+  #prunes:          174
+  #complete_paths:  38
+  #locally_solved:  3
+  #Z3 invocations:  0
+  #paths explored:  240
+  #coverage:        374/604 (61.9%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product56_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product56_Unsat.oox:272:18
+  time:             0.8304668s
+  #branches:        300
+  #prunes:          217
+  #complete_paths:  26
+  #locally_solved:  3
+  #Z3 invocations:  0
+  #paths explored:  299
+  #coverage:        544/607 (89.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product59_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 118.561874
+Concrete invoked
+Concolic invoked
+Coverage: 118.561874
+Statistics
+  Final result:     VALID
+  time:             10.7001752s
+  #branches:        2302
+  #prunes:          2126
+  #complete_paths:  193
+  #locally_solved:  6
+  #Z3 invocations:  0
+  #paths explored:  2301
+  #coverage:        550/613 (89.7%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product5_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product5_Unsat.oox:254:18
+  time:             0.5753515s
+  #branches:        68
+  #prunes:          28
+  #complete_paths:  5
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  67
+  #coverage:        303/532 (57.0%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product60_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 117.1381
+Concrete invoked
+Concolic invoked
+Coverage: 117.1381
+Statistics
+  Final result:     VALID
+  time:             8.509059s
+  #branches:        2123
+  #prunes:          1956
+  #complete_paths:  183
+  #locally_solved:  13
+  #Z3 invocations:  0
+  #paths explored:  2122
+  #coverage:        551/616 (89.4%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product61_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 115.50256
+Concrete invoked
+Concolic invoked
+Coverage: 116.86542
+Concrete invoked
+Concolic invoked
+Coverage: 116.86542
+Statistics
+  Final result:     VALID
+  time:             23.1731958s
+  #branches:        5117
+  #prunes:          4840
+  #complete_paths:  304
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  5116
+  #coverage:        531/603 (88.1%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product62_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 116.27119
+Concrete invoked
+Concolic invoked
+Coverage: 116.27119
+Statistics
+  Final result:     VALID
+  time:             14.0965386s
+  #branches:        2812
+  #prunes:          2662
+  #complete_paths:  164
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  2811
+  #coverage:        531/606 (87.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product63_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 118.060196
+Concrete invoked
+Concolic invoked
+Coverage: 118.060196
+Statistics
+  Final result:     VALID
+  time:             8.8506878s
+  #branches:        1897
+  #prunes:          1721
+  #complete_paths:  193
+  #locally_solved:  9
+  #Z3 invocations:  0
+  #paths explored:  1896
+  #coverage:        549/613 (89.6%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product64_Sat.oox
+[concolic-execution]
+Sould be -> VALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Concolic invoked
+Coverage: 119.30116
+Concrete invoked
+Concolic invoked
+Coverage: 119.96672
+Concrete invoked
+Concolic invoked
+Coverage: 119.96672
+Statistics
+  Final result:     VALID
+  time:             14.1299796s
+  #branches:        3490
+  #prunes:          3200
+  #complete_paths:  318
+  #locally_solved:  25
+  #Z3 invocations:  0
+  #paths explored:  3489
+  #coverage:        554/616 (89.9%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product6_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product6_Unsat.oox:256:18
+  time:             0.6483755s
+  #branches:        134
+  #prunes:          48
+  #complete_paths:  7
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  133
+  #coverage:        421/535 (78.7%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product7_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product7_Unsat.oox:260:18
+  time:             0.6869521s
+  #branches:        250
+  #prunes:          197
+  #complete_paths:  25
+  #locally_solved:  1
+  #Z3 invocations:  0
+  #paths explored:  249
+  #coverage:        451/542 (83.2%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product8_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product8_Unsat.oox:262:18
+  time:             0.6472315s
+  #branches:        382
+  #prunes:          274
+  #complete_paths:  50
+  #locally_solved:  8
+  #Z3 invocations:  0
+  #paths explored:  381
+  #coverage:        462/545 (84.8%)
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Validating spec1-5_product9_Unsat.oox
+[concolic-execution]
+Sould be -> INVALID
+
+Starting up
+Parsing completed
+Symbol table completed
+Typing completed
+Concrete invoked
+Statistics
+  Final result:     INVALID at verification-tasks\MinePump\spec1-5_product9_Unsat.oox:256:18
+  time:             0.6033101s
+  #branches:        56
+  #prunes:          22
+  #complete_paths:  3
+  #locally_solved:  0
+  #Z3 invocations:  0
+  #paths explored:  55
+  #coverage:        294/507 (58.0%)
+------------------------------------------------------------------------

@@ -78,15 +78,30 @@ impl Fuzz for RandomFuzzer{
                 .lookup(&Identifier::from(array_name))
                 .unwrap_or_else(|| panic!("array {:?} was not found on the stack", array_name));
 
+                let type_ = ref_.type_of();
+
                 let ref_ = single_alias_elimination(ref_.clone(), &state.alias_map)
                 .expect_reference()
                 .unwrap_or_else(|| panic!("expected array ref, found expr {:?}", &ref_));
 
                 let new_id = Identifier::from(key_value[0]);
-                let rhs= Rc::new(Expression::Lit { lit: IntLit { int_value: clean_value_str.parse::<i64>().unwrap() }, type_ : IntRuntimeType, info: UnknownPosition });  
+                let rhs;
+                match type_ {
+                    ArrayRuntimeType { inner_type} => {
+                        match *inner_type {
+                            t@IntRuntimeType => rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: clean_value_str.parse::<i64>().unwrap() }, type_ : t, info: UnknownPosition }),
+                            FloatRuntimeType => todo!(),
+                            t@BoolRuntimeType => rhs = Rc::new(Expression::Lit { lit: BoolLit { bool_value: clean_value_str.parse::<bool>().unwrap() }, type_ : t, info: UnknownPosition }),
+                            t@CharRuntimeType => rhs = Rc::new(Expression::Lit { lit: CharLit { char_value: clean_value_str.parse::<char>().unwrap() }, type_ : t, info: UnknownPosition }),
+                            t => panic!("Unimplemented array type: {:?}", t),
+                        };
+                    },
+                    t => panic!("Expected array type but found: {:?}", t),
+                }
+                // let rhs= Rc::new(Expression::Lit { lit: IntLit { int_value: clean_value_str.parse::<i64>().unwrap() }, type_ : IntRuntimeType, info: UnknownPosition });  
 
                 write_elem_concrete_index(state, ref_, index, rhs.clone());
-                new_constraints.push(self.create_input_expression(IntRuntimeType, rhs, &new_id));
+                new_constraints.push(self.create_input_expression(rhs.type_of(), rhs, &new_id));
 
             } else {
                 if let ArrayRuntimeType { .. } = pair[0].1.type_of()  { continue; }
@@ -178,7 +193,7 @@ impl Fuzz for RandomFuzzer{
                                 _ => panic!("Expected array type, found {:?}", t),
                             };
 
-                            array_initialisation(&mut new_state, id, size, t, *inner_type, st);
+                            array_initialisation(&mut new_state, id, size, t, *inner_type.clone(), st);
 
                             let ref_ = new_state
                                 .stack
@@ -191,9 +206,16 @@ impl Fuzz for RandomFuzzer{
 
                             for i in 0..size {
                                 let new_id = Identifier::from(format!("{}{i}", id.as_str()));
-                                let rhs= Rc::new(Expression::Lit { lit: IntLit { int_value: self.rng.gen::<i64>() }, type_ : IntRuntimeType, info: UnknownPosition });                            
+                                let rhs;
+                                if *inner_type == IntRuntimeType {
+                                    rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: self.rng.gen::<i64>() }, type_ : IntRuntimeType, info: UnknownPosition })
+                                } else if *inner_type == BoolRuntimeType {
+                                    rhs = Rc::new(Expression::Lit { lit: BoolLit { bool_value: self.rng.gen_bool(0.5) }, type_ : BoolRuntimeType, info: UnknownPosition })
+                                } else {
+                                    panic!("Inner array type not implemented: {:?}", *inner_type);
+                                }                   
                                 write_elem_concrete_index(&mut new_state, ref_, i as i64, rhs.clone());
-                                fuzzed_inputs.push(self.create_input_expression(IntRuntimeType, rhs, &new_id));
+                                fuzzed_inputs.push(self.create_input_expression(rhs.type_of(), rhs, &new_id));
                             }
                         }
                     },

@@ -188,11 +188,11 @@ pub(crate) fn sym_exec(
                     // Cannot progress further, is valid
                     return SymResult::Valid
                 }
-                if cur_precentage_coverage > 98.0 {
-                    // Coverage is high enough to be valid.
-                    println!("Coverage higher than 98%");
-                    return SymResult::Valid
-                }
+                // if cur_precentage_coverage > 98.0 {
+                //     // Coverage is high enough to be valid.
+                //     println!("Coverage higher than 98%");
+                //     return SymResult::Valid
+                // }
 
                 // Otherwise generate new input for the concrete execution.
                 prev_precentage_coverage = cur_precentage_coverage;

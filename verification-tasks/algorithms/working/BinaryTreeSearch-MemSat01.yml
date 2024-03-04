@@ -1,0 +1,9 @@
+format_version: "2.0"
+input_files:
+  - BinaryTreeSearch-MemSat01.oox
+properties:
+  - property_file: ../properties/assert_java.prp
+    expected_verdict: true
+    # --symbolic-array-size 6
+
+
