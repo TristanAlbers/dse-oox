@@ -1,6 +1,6 @@
 // add class to simulate global counter
 class Counter {
-    - int count;
+    int count;
 
     Counter(){
         this.count := 0;

@@ -188,6 +188,7 @@ pub(crate) fn sym_exec(
                     // Cannot progress further, is valid
                     return SymResult::Valid
                 }
+                statistics.measure_switch();
                 // if cur_precentage_coverage > 98.0 {
                 //     // Coverage is high enough to be valid.
                 //     println!("Coverage higher than 98%");

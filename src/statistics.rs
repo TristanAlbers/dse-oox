@@ -14,6 +14,7 @@ pub struct Statistics {
     pub covered_statements: u32,
     pub coverage: HashSet<u64>,
     pub start_time: Instant,
+    pub concolic_invocations: u32
 }
 
 impl Default for Statistics {
@@ -31,6 +32,7 @@ impl Default for Statistics {
             coverage: HashSet::new(),
             start_time: Instant::now(),
             number_of_paths_explored: 0,
+            concolic_invocations: 0
         }
     }
 }
@@ -58,6 +60,10 @@ impl Statistics {
 
     pub fn measure_invoke_z3(&mut self) {
         self.number_of_z3_invocations += 1;
+    }
+
+    pub fn measure_switch(&mut self) {
+        self.concolic_invocations += 1;
     }
 
     pub fn measure_statement_explored(&mut self, pc: u64) {

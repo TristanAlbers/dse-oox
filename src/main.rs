@@ -73,7 +73,7 @@ enum Commands {
         run_as_benchmark: bool,
 
         /// When run as a benchmark, repeat for this often
-        #[arg(long, default_value_t = 3)]
+        #[arg(long, default_value_t = 1)]
         benchmark_repeat: u64,
 
     },
@@ -144,9 +144,9 @@ fn main() -> Result<(), String> {
                 };
 
                 if run_as_benchmark {
-                    let mut wtr = if !std::path::Path::new("benchmark").exists() {
+                    let mut wtr = if !std::path::Path::new("benchmark_minepump").exists() {
                         let file =
-                        fs::File::create(format!("benchmark")).map_err(|err| err.to_string())?;
+                        fs::File::create(format!("benchmark_minepump")).map_err(|err| err.to_string())?;
                         let mut wtr = csv::Writer::from_writer(file);
                         wtr.write_record(&[
                             "name",
@@ -160,11 +160,12 @@ fn main() -> Result<(), String> {
                             "z3 invocations",
                             "paths explored",
                             "coverage",
+                            "concolic_invocations"
                         ])
                         .map_err(|err| err.to_string())?;
                         wtr
                     } else {
-                        let file = fs::File::options().append(true).open("benchmark").map_err(|err| err.to_string())?;
+                        let file = fs::File::options().append(true).open("benchmark_minepump").map_err(|err| err.to_string())?;
                         csv::Writer::from_writer(file)
                     };
                     
@@ -178,7 +179,7 @@ fn main() -> Result<(), String> {
                         let result_text = result_text(sym_result, &source_paths);
 
                         wtr.write_record(&[
-                            source_paths[0].split("/").last().unwrap(),
+                            source_paths[0].split("\\").last().unwrap(),
                             &format!("{:?}", heuristic),
                             &k.to_string(),
                             &duration.as_secs_f64().to_string(),
@@ -196,6 +197,7 @@ fn main() -> Result<(), String> {
                                     / statistics.reachable_statements as f32)
                                     * 100.0
                             )),
+                            &statistics.concolic_invocations.to_string(),
                         ])
                         .map_err(|err| err.to_string())?;
                     }
@@ -235,7 +237,11 @@ fn main() -> Result<(), String> {
                             (statistics.covered_statements as f32
                                 / statistics.reachable_statements as f32)
                                 * 100.0
-                        )
+                        );
+                        println!(
+                            "  #concolic invocations:  {}",
+                            statistics.concolic_invocations
+                        );
                     }
                 }
             } else {
@@ -344,8 +350,9 @@ fn result_text(sym_result: SymResult, source_paths: &[String]) -> String {
             col,
             file_number,
         }) => {
-            format!("INVALID at {}:{}:{}", source_paths[file_number], line, col)
+            // format!("INVALID at {}:{}:{}", source_paths[file_number], line, col)
+            "INVALID".to_string()
         }
-        SymResult::Invalid(SourcePos::UnknownPosition) => "INVALID at unknown position".to_string(),
+        SymResult::Invalid(SourcePos::UnknownPosition) => {"INVALID at unknown position".to_string(); "INVALID".to_string()},
     }
 }

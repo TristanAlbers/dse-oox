@@ -1,0 +1,69 @@
+\begin{table}[h]
+\caption{Results }
+\label{tab:res}
+\begin{tabular}{c|c|c|c|c|c}
+
+name & heuristic & time & result & coverage\_tuples & paths explored \\
+\hline
+Ackermann01.oox & ConcolicExecution & 0.26 & INVALID & 25/42 (59.5\%) & 22 \\
+Ackermann01.oox & MinDist2Uncovered & 0.04 & INVALID & 33/42 (78.6\%) & 5 \\
+\hline
+Addition.oox & ConcolicExecution & 0.88 & VALID & 31/34 (91.2\%) & 62 \\
+Addition.oox & MinDist2Uncovered & 143.76 & VALID & 32/34 (94.1\%) & 7406 \\
+\hline
+InfiniteLoop.oox & ConcolicExecution & 0.01 & INVALID & 8/9 (88.9\%) & 125 \\
+InfiniteLoop.oox & MinDist2Uncovered & 0.02 & INVALID & 8/9 (88.9\%) & 1 \\
+\hline
+SatAckermann01.oox & ConcolicExecution & 1.14 & VALID & 28/28 (100.0\%) & 65 \\
+SatAckermann01.oox & MinDist2Uncovered & 128.44 & VALID & 28/28 (100.0\%) & 7130 \\
+\hline
+SatAckermann02.oox & ConcolicExecution & 1.11 & VALID & 28/28 (100.0\%) & 65 \\
+SatAckermann02.oox & MinDist2Uncovered & 134.97 & VALID & 28/28 (100.0\%) & 7600 \\
+\hline
+SatAckermann03.oox & ConcolicExecution & 1.12 & VALID & 28/28 (100.0\%) & 65 \\
+SatAckermann03.oox & MinDist2Uncovered & 127.32 & VALID & 28/28 (100.0\%) & 7175 \\
+\hline
+SatAddition01.oox & ConcolicExecution & 0.97 & VALID & 33/37 (89.2\%) & 68 \\
+SatAddition01.oox & MinDist2Uncovered & 149.75 & VALID & 35/37 (94.6\%) & 8144 \\
+\hline
+SatEvenOdd01.oox & ConcolicExecution & 2.31 & VALID & 44/47 (93.6\%) & 665 \\
+SatEvenOdd01.oox & MinDist2Uncovered & 1.61 & VALID & 46/47 (97.9\%) & 220 \\
+\hline
+SatFibonacci01.oox & ConcolicExecution & 0.09 & VALID & 20/30 (66.7\%) & 23 \\
+SatFibonacci01.oox & MinDist2Uncovered & 138.25 & VALID & 30/30 (100.0\%) & 6996 \\
+\hline
+SatFibonacci02.oox & ConcolicExecution & 1.83 & VALID & 20/26 (76.9\%) & 966 \\
+SatFibonacci02.oox & MinDist2Uncovered & 0.05 & VALID & 20/26 (76.9\%) & 69 \\
+\hline
+SatFibonacci03.oox & ConcolicExecution & 11.74 & VALID & 29/30 (96.7\%) & 1551 \\
+SatFibonacci03.oox & MinDist2Uncovered & 137.13 & VALID & 30/30 (100.0\%) & 6463 \\
+\hline
+SatGcd.oox & ConcolicExecution & 2.23 & VALID & 44/46 (95.7\%) & 145 \\
+SatGcd.oox & MinDist2Uncovered & 142.89 & VALID & 44/46 (95.7\%) & 6497 \\
+\hline
+SatHanoi01.oox & ConcolicExecution & 4.62 & VALID & 34/59 (57.6\%) & 750 \\
+SatHanoi01.oox & MinDist2Uncovered & 128.52 & VALID & 57/59 (96.6\%) & 8005 \\
+\hline
+SatMccarthy91.oox & ConcolicExecution & 9.13 & VALID & 16/16 (100.0\%) & 1172 \\
+SatMccarthy91.oox & MinDist2Uncovered & 134.17 & VALID & 16/16 (100.0\%) & 6318 \\
+\hline
+SatPrimes01.oox & MinDist2Uncovered & 142.48 & VALID & 106/117 (90.6\%) & 6449 \\
+\hline
+UnsatAckermann01.oox & ConcolicExecution & 6.64 & VALID & 24/26 (92.3\%) & 1187 \\
+UnsatAckermann01.oox & MinDist2Uncovered & 7.62 & INVALID & 26/26 (100.0\%) & 1662 \\
+\hline
+UnsatAddition01.oox & ConcolicExecution & 6.02 & INVALID & 20/24 (83.3\%) & 1356 \\
+UnsatAddition01.oox & MinDist2Uncovered & 148.14 & VALID & 22/24 (91.7\%) & 7824 \\
+\hline
+UnsatAddition02.oox & ConcolicExecution & 0.02 & INVALID & 6/7 (85.7\%) & 0 \\
+UnsatAddition02.oox & MinDist2Uncovered & 0.02 & INVALID & 6/7 (85.7\%) & 0 \\
+\hline
+UnsatEvenOdd01.oox & ConcolicExecution & 0.15 & INVALID & 38/47 (80.9\%) & 424 \\
+UnsatEvenOdd01.oox & MinDist2Uncovered & 0.05 & INVALID & 43/47 (91.5\%) & 7 \\
+\hline
+UnsatMccarthy91.oox & ConcolicExecution & 8.98 & VALID & 16/16 (100.0\%) & 1233 \\
+UnsatMccarthy91.oox & MinDist2Uncovered & 0.03 & INVALID & 11/16 (68.8\%) & 1 \\
+\hline
+
+\end{tabular}
+\end{table}

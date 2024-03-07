@@ -1,0 +1,39 @@
+\begin{table}[h]
+\caption{Results }
+\label{tab:res}
+\begin{tabular}{c|c|c|c|c|c}
+name & time & result & concolic\_invocations & paths explored \\
+\hline
+spec1-5\_product10\_Unsat.oox & 0.225 & INVALID & 0 & 51 \\
+spec1-5\_product11\_Unsat.oox & 0.256 & INVALID & 0 & 36 \\
+spec1-5\_product12\_Unsat.oox & 0.247 & INVALID & 0 & 66 \\
+spec1-5\_product13\_Unsat.oox & 0.315 & INVALID & 0 & 303 \\
+spec1-5\_product14\_Unsat.oox & 0.251 & INVALID & 0 & 57 \\
+spec1-5\_product15\_Unsat.oox & 0.289 & INVALID & 0 & 310 \\
+spec1-5\_product16\_Unsat.oox & 0.275 & INVALID & 0 & 174 \\
+spec1-5\_product1\_Unsat.oox & 0.246 & INVALID & 0 & 127 \\
+spec1-5\_product2\_Unsat.oox & 0.238 & INVALID & 0 & 84 \\
+spec1-5\_product3\_Unsat.oox & 0.255 & INVALID & 0 & 182 \\
+spec1-5\_product48\_Unsat.oox & 0.411 & INVALID & 0 & 428 \\
+spec1-5\_product49\_Unsat.oox & 0.266 & INVALID & 0 & 64 \\
+spec1-5\_product4\_Unsat.oox & 0.243 & INVALID & 0 & 70 \\
+spec1-5\_product50\_Unsat.oox & 0.277 & INVALID & 0 & 54 \\
+spec1-5\_product51\_Unsat.oox & 0.297 & INVALID & 0 & 131 \\
+spec1-5\_product52\_Unsat.oox & 0.319 & INVALID & 0 & 260 \\
+spec1-5\_product53\_Unsat.oox & 0.320 & INVALID & 0 & 223 \\
+spec1-5\_product54\_Unsat.oox & 0.314 & INVALID & 0 & 220 \\
+spec1-5\_product55\_Unsat.oox & 0.326 & INVALID & 0 & 389 \\
+spec1-5\_product56\_Unsat.oox & 0.289 & INVALID & 0 & 46 \\
+spec1-5\_product59\_Sat.oox & 5.493 & VALID & 1 & 1894 \\
+spec1-5\_product5\_Unsat.oox & 0.267 & INVALID & 0 & 174 \\
+spec1-5\_product60\_Sat.oox & 3.369 & VALID & 1 & 2331 \\
+spec1-5\_product61\_Sat.oox & 7.874 & VALID & 1 & 3252 \\
+spec1-5\_product62\_Sat.oox & 5.880 & VALID & 1 & 2530 \\
+spec1-5\_product63\_Sat.oox & 4.346 & VALID & 1 & 3118 \\
+spec1-5\_product64\_Sat.oox & 9.610 & VALID & 2 & 3944 \\
+spec1-5\_product6\_Unsat.oox & 0.233 & INVALID & 0 & 72 \\
+spec1-5\_product7\_Unsat.oox & 0.283 & INVALID & 0 & 106 \\
+spec1-5\_product8\_Unsat.oox & 0.267 & INVALID & 0 & 71 \\
+spec1-5\_product9\_Unsat.oox & 0.333 & INVALID & 0 & 479 \\
+\end{tabular}
+\end{table}

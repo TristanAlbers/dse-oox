@@ -4,5 +4,6 @@ input_files:
 properties:
   - property_file: ../properties/assert_java.prp
     expected_verdict: false
+    # Overflow starting at k-depth 550
 
 

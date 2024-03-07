@@ -1,27 +1,25 @@
 import os
-files = os.listdir("../benchmark_programs/experiment2/LinkedList/mutations")
+files = os.listdir("verification-tasks\\MinePump")
 
-files = sorted(files)
-
-files.remove('.gitignore')
+oox_files = list(filter( lambda x: (".oox" in x), files))
 
 
 print(len(files))
 
 def main(files, sample_amount_percentage: int):
-    import random
-    files = random.sample(files, int((len(files) * sample_amount_percentage) / 100))
+    # import random
+    # files = random.sample(files, int((len(files) * sample_amount_percentage) / 100))
     # print(files)
     for file in files:
         print(file)
-        k = 140
-        heuristics = ['depth-first-search', 'random-path', 'min-dist2-uncovered', 'round-robin-md2u-random-path']
+        k = 1500
+        heuristics = ['concolic-execution']
         
 
         for h in heuristics:
-            command = f'cargo run --release -- verify ../benchmark_programs/experiment2/LinkedList/mutations/{file} -f Main.test2 -k {k} --time-budget 10 -s 5 --heuristic {h} --run-as-benchmark -q'
+            command = f'cargo run -- verify verification-tasks\\MinePump\\{file} -f Main.main -k {k} --time-budget 120  --heuristic {h} --run-as-benchmark -q --symbolic-array-size 12'
 
             result = os.system(command)
 
-main(files, 100)
+main(oox_files, 100)
 

@@ -4,5 +4,6 @@ input_files:
 properties:
   - property_file: ../properties/assert_java.prp
     expected_verdict: true
+    # Works but overflows at 900
 
 
