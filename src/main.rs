@@ -56,6 +56,10 @@ enum Commands {
         #[arg(long, default_value = "./logs/log.txt")]
         log_path: String,
 
+        /// The path where the log file should be written.
+        #[arg(long, default_value = "./generated_files/benchmark")]
+        benchmark_path: String,
+
         /// Prune paths using Z3. This may alter performance or not work well with some heuristics. But it will ensure we don't visit unfeasible paths.
         #[arg(long, default_value_t = false)]
         prune_path_z3: bool,
@@ -121,7 +125,8 @@ fn main() -> Result<(), String> {
             local_solving_threshold,
             no_local_solving_threshold,
             run_as_benchmark,
-            benchmark_repeat
+            benchmark_repeat,
+            benchmark_path
         } => {
             if let Some((class_name, method_name)) = function.split('.').collect_tuple() {
                 let options = Options {
@@ -144,9 +149,9 @@ fn main() -> Result<(), String> {
                 };
 
                 if run_as_benchmark {
-                    let mut wtr = if !std::path::Path::new("benchmark_minepump").exists() {
+                    let mut wtr = if !std::path::Path::new(&benchmark_path).exists() {
                         let file =
-                        fs::File::create(format!("benchmark_minepump")).map_err(|err| err.to_string())?;
+                        fs::File::create(&benchmark_path).map_err(|err| err.to_string())?;
                         let mut wtr = csv::Writer::from_writer(file);
                         wtr.write_record(&[
                             "name",
@@ -165,7 +170,7 @@ fn main() -> Result<(), String> {
                         .map_err(|err| err.to_string())?;
                         wtr
                     } else {
-                        let file = fs::File::options().append(true).open("benchmark_minepump").map_err(|err| err.to_string())?;
+                        let file = fs::File::options().append(true).open(&benchmark_path).map_err(|err| err.to_string())?;
                         csv::Writer::from_writer(file)
                     };
                     
@@ -176,7 +181,7 @@ fn main() -> Result<(), String> {
                             verify(source_paths.as_slice(), class_name, method_name, options)?;
                         let duration = start.elapsed();
 
-                        let result_text = result_text(sym_result, &source_paths);
+                        let result_text = result_text_benchmark(sym_result);
 
                         wtr.write_record(&[
                             source_paths[0].split("\\").last().unwrap(),
@@ -239,8 +244,12 @@ fn main() -> Result<(), String> {
                                 * 100.0
                         );
                         println!(
-                            "  #concolic invocations:  {}",
+                            "  #concolic calls:  {}",
                             statistics.concolic_invocations
+                        );
+                        println!(
+                            "  #xtra:            {}",
+                            statistics.xtra
                         );
                     }
                 }
@@ -350,9 +359,15 @@ fn result_text(sym_result: SymResult, source_paths: &[String]) -> String {
             col,
             file_number,
         }) => {
-            // format!("INVALID at {}:{}:{}", source_paths[file_number], line, col)
-            "INVALID".to_string()
+            format!("INVALID at {}:{}:{}", source_paths[file_number], line, col)
         }
-        SymResult::Invalid(SourcePos::UnknownPosition) => {"INVALID at unknown position".to_string(); "INVALID".to_string()},
+        SymResult::Invalid(SourcePos::UnknownPosition) => "INVALID at unknown position".to_string(),
+    }
+}
+
+fn result_text_benchmark(sym_result: SymResult) -> String {
+    match sym_result {
+        SymResult::Valid => "VALID".to_string(),
+        SymResult::Invalid(..) =>  "INVALID".to_string(),
     }
 }
