@@ -49,6 +49,7 @@ impl Fuzz for RandomFuzzer{
 
     fn set_latest_input(&mut self, inputs: Vec<Rc<Expression>>) {
         self.prev_inputs = inputs.to_owned();
+        // println!("Updated last input to: {:?}", inputs)
     }
 
     fn fuzz_inputs_from_negations(&mut self, state: &mut State, inputs: &HashMap<Identifier, Rc<Expression>>, negations: &mut Vec<Rc<Expression>>, am: im_rc::HashMap<Identifier, crate::exec::AliasEntry>, fuzzed_inputs: Vec<Rc<Expression>>) -> Vec<Rc<Expression>> {
@@ -144,14 +145,14 @@ impl Fuzz for RandomFuzzer{
             {
                 match ex.type_of() {
                     t@IntRuntimeType => {
-                        let value = self.rng.gen::<i64>();
-                        let rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: value }, type_ : t.clone(), info: UnknownPosition });
+                        let value = self.rng.gen::<i16>();
+                        let rhs = Rc::new(Expression::Lit { lit: IntLit { int_value: i64::from(value) }, type_ : t.clone(), info: UnknownPosition });
                         fuzzed_inputs.push(self.create_input_expression(t, rhs.clone(), id));
                         new_state.stack.insert_variable(id.clone(), rhs);
                     },
                     t@UIntRuntimeType =>{
-                        let value = self.rng.gen::<u64>();
-                        let rhs = Rc::new(Expression::Lit { lit: UIntLit { uint_value: value }, type_ : t.clone(), info: UnknownPosition });
+                        let value = self.rng.gen::<u16>();
+                        let rhs = Rc::new(Expression::Lit { lit: UIntLit { uint_value: u64::from(value) }, type_ : t.clone(), info: UnknownPosition });
                         fuzzed_inputs.push(self.create_input_expression(t, rhs.clone(), id));
                         new_state.stack.insert_variable(id.clone(), rhs);
                     },
@@ -337,7 +338,7 @@ fn get_array_size(expr: Rc<Expression>, array_name: &Identifier) -> Option<Rc<Ex
 pub(crate) fn start_fuzzing(
     fuzzer: &mut impl Fuzz,
     found_negations: &mut Option<&mut Vec<Rc<Expression>>>,
-    prev_found_transitions: &mut HashSet<(u64, u64)>,
+    prev_found_transitions: &mut HashMap<(u64, u64), u64>,
     state: State,
     program: &HashMap<u64, CFGStatement>,
     flows: &HashMap<u64, Vec<u64>>,
@@ -348,6 +349,7 @@ pub(crate) fn start_fuzzing(
     entry_method: crate::cfg::MethodIdentifier,
     options: &Options,
 ) -> Either<SymResult, Vec<Rc<Expression>>>{
+    let mut total_executions = 0;
     let mut stuck_counter = 0;
     let mut requirements = None;
     let StackFrame { current_member, .. } = state.stack.current_stackframe().unwrap();
@@ -358,6 +360,7 @@ pub(crate) fn start_fuzzing(
     let stack_variables = state.stack.current_variables().unwrap();
     let alias_map: im_rc::HashMap<Identifier, crate::exec::AliasEntry> = state.alias_map.clone();
     let (mut fuzzed_inputs, mut fuzzed_state) = fuzzer.fuzz_inputs(&state, stack_variables, options.symbolic_array_size, found_negations, alias_map.clone(), requirements.clone(), st);
+    
     let total_found_transitions = prev_found_transitions;
 
     loop{
@@ -380,16 +383,36 @@ pub(crate) fn start_fuzzing(
             options
         );
         debug!( root_logger,"Conceretely executed in {:?} millis", now.elapsed().as_millis());
-
+        total_executions += 1;
         match res {
             SymResult::Valid => {
                 let mut found_new_transitions = false;
-                heuristic.coverage_tuples.clone().into_iter().for_each(|k| {if total_found_transitions.insert(k) { found_new_transitions = true } });
-                if found_new_transitions { stuck_counter = 0; fuzzer.set_latest_input(fuzzed_inputs.clone()); } else { stuck_counter += 1  };
 
+                heuristic.coverage_tuples.into_iter().for_each(|k| {
+                    if let Some(value) = total_found_transitions.get(&k.0){
+                        if k.1 > *value {
+                            found_new_transitions = true;
+                            total_found_transitions.insert(k.0, k.1);
+                        }
+                    } else {
+                        found_new_transitions = true;
+                        total_found_transitions.insert(k.0, k.1);
+                    }
+                });
+
+                // dbg!(found_new_transitions);
+                if found_new_transitions { 
+                    stuck_counter = 0;
+                    fuzzer.set_latest_input(fuzzed_inputs.clone()); 
+                } else if *found_negations == None { 
+                    stuck_counter += 1  
+                };
                 // When stuck return the trace
                 // println!("Stuck counter: {:?}", stuck_counter);
-                if stuck_counter > 5 { return Either::Right(fuzzer.get_latest_input()) };
+                if stuck_counter > 5 {
+                    debug!( root_logger,"Total concrete executions: {:?}", total_executions);
+                    return Either::Right(fuzzer.get_latest_input())
+                };
                 // Choose new fuzzing inputs (random or based on other inputs)
                 (fuzzed_inputs, fuzzed_state) = fuzzer.fuzz_inputs(&state,stack_variables, options.symbolic_array_size, found_negations, alias_map.clone(), requirements.clone(), st);
             },
@@ -399,4 +422,5 @@ pub(crate) fn start_fuzzing(
         // Repeat untill stuck
     }
 }
+
 

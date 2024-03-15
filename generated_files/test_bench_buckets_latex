@@ -1,0 +1,16 @@
+\begin{table}[h]
+\caption{Results bucketization }
+\label{tab:res}
+\begin{tabular}{c|c|c|c|c|c}
+
+name & time & paths explored & coverage & concolic\_invocations \\
+\hline
+spec1-5\_product59\_Sat.oox & 5.737 & 4551 & 550/613 (89.7\%) & 1 \\
+spec1-5\_product60\_Sat.oox & 21.381 & 10157 & 553/616 (89.8\%) & 4 \\
+spec1-5\_product61\_Sat.oox & 67.434 & 20640 & 531/603 (88.1\%) & 7 \\
+spec1-5\_product62\_Sat.oox & 17.650 & 8113 & 531/606 (87.6\%) & 2 \\
+spec1-5\_product63\_Sat.oox & 26.166 & 9009 & 551/613 (89.9\%) & 4 \\
+spec1-5\_product64\_Sat.oox & 30.081 & 10875 & 554/616 (89.9\%) & 3 \\
+
+\end{tabular}
+\end{table}

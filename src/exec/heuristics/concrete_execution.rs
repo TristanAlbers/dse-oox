@@ -10,18 +10,22 @@ use super::{
 use slog::Logger;
 
 pub(super) struct ConcreteExecution {
-    pub coverage_tuples: Vec<(u64, u64)>
+    pub coverage_tuples: HashMap<(u64, u64), u64>
 }
 
 impl ConcreteExecution{
     pub(super) fn new() -> ConcreteExecution{
         ConcreteExecution{
-            coverage_tuples: Vec::new()
+            coverage_tuples: HashMap::new()
         }
     }
 
     pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
-        self.coverage_tuples.push(tuple);
+        if let Some(value) = self.coverage_tuples.get(&tuple){
+            self.coverage_tuples.insert(tuple, value + 1);
+        } else {
+            self.coverage_tuples.insert(tuple, 0);
+        }
     }
 }
 

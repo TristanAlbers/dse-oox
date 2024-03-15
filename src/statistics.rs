@@ -14,7 +14,8 @@ pub struct Statistics {
     pub covered_statements: u32,
     pub coverage: HashSet<u64>,
     pub start_time: Instant,
-    pub concolic_invocations: u32
+    pub concolic_invocations: u32,
+    pub xtra: u32
 }
 
 impl Default for Statistics {
@@ -32,7 +33,8 @@ impl Default for Statistics {
             coverage: HashSet::new(),
             start_time: Instant::now(),
             number_of_paths_explored: 0,
-            concolic_invocations: 0
+            concolic_invocations: 0,
+            xtra: 0
         }
     }
 }
@@ -69,5 +71,9 @@ impl Statistics {
     pub fn measure_statement_explored(&mut self, pc: u64) {
         self.coverage.insert(pc);
         self.covered_statements = self.coverage.len() as u32;
+    }
+
+    pub fn measure_xtra(&mut self, value: u32) {
+        self.xtra += value;
     }
 }

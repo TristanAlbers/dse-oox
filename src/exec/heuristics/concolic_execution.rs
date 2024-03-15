@@ -1,6 +1,6 @@
 
 
-use std::{cell::RefCell, collections::{HashMap, HashSet}, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     cfg::CFGStatement, dsl::and, exec::{collect_path_constraints, eval::evaluate, exec_assume, heuristics::fuzzer::*}, reachability::transitions_set, statistics::Statistics, z3_checker, Expression, Options, Statement, SymbolTable
@@ -20,28 +20,55 @@ pub(super) struct ConcolicExecution {
     rng: ThreadRng,
     input_constraints: Vec<Rc<Expression>>,
     found_negations: Vec<Rc<Expression>>,
-    coverage_tuples: Vec<(u64, u64)>,
-    previously_found_transitions: HashSet<(u64, u64)>,
+    coverage_tuples: HashMap<(u64, u64), u64>,
+    previously_found_transitions: HashMap<(u64, u64), u64>,
+    unreachable_tuples: HashMap<(u64, u64), u64>,
 }
 
 impl ConcolicExecution{
-    pub(super) fn new(constraints: Vec<Rc<Expression>>, prev_transitons: &HashSet<(u64, u64)>) -> ConcolicExecution {
+    pub(super) fn new(
+        constraints: Vec<Rc<Expression>>,
+        prev_transitons: &HashMap<(u64, u64), u64>,
+        unreachable_tuples: HashMap<(u64, u64), u64>
+    ) -> ConcolicExecution {
         ConcolicExecution {
             rng: rand::thread_rng(),
             input_constraints: constraints,
             found_negations: Vec::new(),
-            coverage_tuples: Vec::new(),
+            coverage_tuples: HashMap::new(),
             previously_found_transitions: prev_transitons.to_owned(),
+            unreachable_tuples,
         }
     }
 
     pub(super) fn add_negation(&mut self, expr: Rc<Expression>) {
         self.found_negations.push(expr);
-    } 
+    }
 
-    pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
-        self.coverage_tuples.push(tuple);
-    } 
+    pub(super) fn get_unreachable_tuples (self) -> HashMap<(u64, u64), u64> {
+        self.unreachable_tuples
+    }  
+
+    pub(super) fn add_coverage_tuple(&mut self, leaf: Rc<RefCell<ExecutionTree>>) {
+        let parent_statement = leaf.borrow().parent().upgrade().unwrap_or_default().borrow().statement();
+        let child_statement = leaf.borrow().statement();
+        let tuple = (parent_statement, child_statement);
+        if let Some(value) = self.coverage_tuples.get(&tuple){
+            self.coverage_tuples.insert(tuple, value + 1);
+        } else {
+            self.coverage_tuples.insert(tuple, 0);
+        }
+    }
+
+    pub(super) fn add_found_transition(&mut self, tuple: (u64, u64)) {
+        if let Some(value) = self.previously_found_transitions.get(&tuple){
+            self.previously_found_transitions.insert(tuple, value + 1);
+            // println!("Added {:?} \n in {:?}", tuple, self.previously_found_transitions)
+        } else {
+            self.previously_found_transitions.insert(tuple, 0);
+            // println!("Added {:?} \n in {:?}", tuple, self.previously_found_transitions)
+        }
+    }
 }
 
 impl ExecutionTreeBasedHeuristic for ConcolicExecution {
@@ -59,20 +86,42 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
             options: &Options,
         ) -> Rc<RefCell<ExecutionTree>> {
             let leafs = ExecutionTree::leafs(root.clone());
+            let mut tuples: HashMap<(u64, u64), u64> = HashMap::new();
             
             for leaf in leafs.clone() {
                 let cur_statement = RefCell::borrow(&leaf).statement();
+                // let start_time =  Instant::now();
                 let mut covers_new_code = false;
-                if let Some(items) = flows.get(&cur_statement){
-                    for stmt in items{
-                        if !(self.previously_found_transitions.contains(&(cur_statement, *stmt))){
+                
+                if let Some(statements) = flows.get(&cur_statement){
+                    for stmt in statements {
+                        let tuple = (cur_statement, *stmt);
+                        
+                        let cur_encounters = self.coverage_tuples.get(&tuple).unwrap_or(&0);
+                        let prev_encounters = self.previously_found_transitions.get(&tuple);
+                        
+                        if prev_encounters == None {
+                            // previously uncovered code
+                            covers_new_code = true;
+                        } else if *cur_encounters > *prev_encounters.unwrap() {
+                            // deeper executions of code
+                            // println!("Discovers deeper code");
                             covers_new_code = true;
                         }
+                        tuples.insert(tuple, *cur_encounters);
                     }
                 } else {
                     covers_new_code = true;
                 }
-                if !covers_new_code { continue; }
+                // statistics.measure_xtra(start_time.elapsed().subsec_micros());
+                let tuples_are_unreachable = tuples.clone().into_iter().map(|(k,v)| {
+                    self.unreachable_tuples.get_key_value(&k) == Some((&k,&v))
+                }).fold(true, |acc, num| {acc && num});
+                if !covers_new_code || tuples_are_unreachable {
+                    // reset tuples since in loop
+                    tuples = HashMap::new();
+                    continue;
+                }
 
                 match program.get(&cur_statement).unwrap() {
                     CFGStatement::Statement( Statement::Assume { assumption, .. } ) => {
@@ -109,14 +158,22 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                                     let constraints = collect_path_constraints(&target_state);
                                     let assumption = evaluate(&mut target_state, assumption_expr.clone(), en);
                                     let expression = evaluate(&mut target_state, and(constraints, assumption), en);
-
+                                    
                                     if !(*expression == Expression::FALSE) {
                                         let result: SatResult = z3_checker::all_z3::verify(&expression, &target_state.alias_map).0;
                                         if result == SatResult::Sat && *expression != Expression::TRUE {
                                             // feasible after lifting input constraints, should solve
                                             debug!(root_logger, "Negation found: {:?}", expression);
+                                            // println!("Feasible: {:?} \n tuples: {:?}", expression, &tuples);
+                                            tuples.into_iter().for_each(|(k,_)| self.add_found_transition(k));
                                             self.add_negation(expression);
+                                        } else {
+                                            // println!("Infeasible");
+                                            self.unreachable_tuples.extend(tuples);
                                         }
+                                    } else {
+                                        // println!("Infeasible");
+                                        self.unreachable_tuples.extend(tuples);
                                     }
                                 }
                                 Either::Right(_assumption) => {
@@ -130,10 +187,12 @@ impl ExecutionTreeBasedHeuristic for ConcolicExecution {
                     },
                     _ => (),
                 }
+                self.add_coverage_tuple(Rc::clone(&leaf));
                 return leaf;
             }
             
-            leafs[0].clone()
+            self.add_coverage_tuple(Rc::clone(&leafs[0]));
+            Rc::clone(&leafs[0])
     }
 }
 
@@ -154,10 +213,13 @@ pub(crate) fn sym_exec(
     let mut negation_owner;
     let mut found_negations = None;
     let total_transitions = transitions_set(entry_method.clone(), program, flows, st).len();
-    let mut total_coverage = HashSet::new();
-    let mut prev_precentage_coverage = 0.0;
+    let mut prev_coverage = HashMap::new();
+    let mut total_coverage = HashMap::new();
+    let mut unreachable_tuples = HashMap::new();
+    // let mut prev_precentage_coverage = 0.0;
     let concrete_options = default_concrete_options(options);
     let concolic_options = default_concolic_options(options);
+    // let mut fake_statistics = Statistics::default();
 
     loop {
         info!(root_logger, "Concrete invoked"); println!("Concrete invoked");
@@ -180,14 +242,16 @@ pub(crate) fn sym_exec(
             Either::Left(symres) => return symres,
             Either::Right(trace) => {
                 info!(root_logger, "Concolic invoked"); println!("Concolic invoked");
+                debug!(root_logger, "Trace received: {:?}", trace);
                 
                 let cur_precentage_coverage = (total_coverage.len() as f32 / total_transitions as f32) * 100.0;
-                println!("Coverage: {:?}", cur_precentage_coverage);
                 
-                if cur_precentage_coverage <= prev_precentage_coverage {
+                if prev_coverage == total_coverage {
                     // Cannot progress further, is valid
                     return SymResult::Valid
                 }
+                println!("Progressing...\nCoverage percentage: {:?}", cur_precentage_coverage);
+                prev_coverage = total_coverage.clone();
                 statistics.measure_switch();
                 // if cur_precentage_coverage > 98.0 {
                 //     // Coverage is high enough to be valid.
@@ -196,12 +260,12 @@ pub(crate) fn sym_exec(
                 // }
 
                 // Otherwise generate new input for the concrete execution.
-                prev_precentage_coverage = cur_precentage_coverage;
+                // prev_precentage_coverage = cur_precentage_coverage;
                 let mut loc_state = state.clone();
                 for input in trace.clone() {
                     loc_state.constraints.insert(input);
                 }
-                let mut heuristic = ConcolicExecution::new(trace, &total_coverage);
+                let mut heuristic = ConcolicExecution::new(trace, &total_coverage, unreachable_tuples);
                 let _concolic_res = sym_exec_execution_tree(
                     loc_state, 
                     program, 
@@ -216,6 +280,7 @@ pub(crate) fn sym_exec(
                 );
                 negation_owner = heuristic.found_negations.clone();
                 found_negations = Some(&mut negation_owner);
+                unreachable_tuples = heuristic.get_unreachable_tuples();
             },
         }
     }
