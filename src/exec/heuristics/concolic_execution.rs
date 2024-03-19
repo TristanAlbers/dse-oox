@@ -11,7 +11,7 @@ use itertools::Either;
 use z3::SatResult;
 
 use super::{
-    execution_tree::{sym_exec_execution_tree, ExecutionTree, ExecutionTreeBasedHeuristic}, IdCounter, ProgramCounter, State, SymResult
+    execution_tree::{sym_exec_execution_tree, ExecutionTree, ExecutionTreeBasedHeuristic}, utils::random_fuzzer::RandomFuzzer, IdCounter, ProgramCounter, State, SymResult
 };
 use rand::rngs::ThreadRng;
 use slog::{debug, info, Logger};

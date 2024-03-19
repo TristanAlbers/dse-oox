@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, ops::Deref, rc::Rc};
 
 use crate::{
     cfg::CFGStatement, statistics::Statistics, Options, SymbolTable
@@ -8,23 +8,26 @@ use super::{
     execution_tree::{ExecutionTree, ExecutionTreeBasedHeuristic}, IdCounter, ProgramCounter
 };
 use slog::Logger;
+use serde::{Deserialize, Serialize};
 
+// #[derive(Serialize, Deserialize, Debug)]
 pub(super) struct ConcreteExecution {
-    pub coverage_tuples: HashMap<(u64, u64), u64>
+    pub coverage_tuples: Rc<RefCell<HashMap<(u64, u64), u64>>>
 }
 
 impl ConcreteExecution{
-    pub(super) fn new() -> ConcreteExecution{
-        ConcreteExecution{
-            coverage_tuples: HashMap::new()
+    pub(super) fn new(coverage_tuples: Rc<RefCell<HashMap<(u64, u64), u64>>>) -> ConcreteExecution{
+        Self {
+            coverage_tuples
         }
     }
 
     pub(super) fn add_coverage_tuple(&mut self, tuple: (u64, u64)) {
-        if let Some(value) = self.coverage_tuples.get(&tuple){
-            self.coverage_tuples.insert(tuple, value + 1);
+        let mut map = RefCell::borrow_mut(self.coverage_tuples.deref());
+        if let Some(value) = map.clone().get(&tuple){
+            map.insert(tuple, value + 1);
         } else {
-            self.coverage_tuples.insert(tuple, 0);
+            map.insert(tuple, 0);
         }
     }
 }

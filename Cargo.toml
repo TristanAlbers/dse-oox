@@ -2,6 +2,7 @@
 name = "oox"
 version = "0.1.0"
 edition = "2021"
+authors = ["Tristan Albers <tristanalbers@gmail.com>", "Daniel van Vliet <d.vliet@students.uu.nl>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,6 +13,9 @@ path = "src/main.rs"
 [lib]
 name = "lib"
 path = "src/lib.rs"
+
+[profile.dev]
+panic = "abort"
 
 [dependencies]
 # nom = "7" old parser
@@ -34,6 +38,9 @@ rand = "0.8.5" # random
 pretty = "0.11.3" # pretty printing library
 im-rc = "15.1.0" # immutable maps, arrays to optimize memory usage
 csv = "1.2.2"
+libafl = { path = "../LibAFL/libafl/" }
+libafl_bolts = { path = "../LibAFL/libafl_bolts/" }
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] } # serialization lib
 
 [[bench]]
 name = "experiment1"
